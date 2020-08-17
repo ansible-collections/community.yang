@@ -1,0 +1,10 @@
+---
+authors:
+  - Ansible Network Community (ansible-network)
+license_file: LICENSE
+name: yang
+namespace: community
+readme: README.md
+repository: https://github.com/ansible-collections/community.yang
+tags: [networking, security, cloud, network_cli, netconf, httpapi, grpc]
+version: null
