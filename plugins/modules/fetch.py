@@ -22,7 +22,7 @@ options:
         the dependent yang models and return as part of result
     required: true
 author:
-  - Ansible Network Team
+  - Ganesh Nalawade (@ganeshrn)
 """
 RETURN = """
 number_schema_fetched:

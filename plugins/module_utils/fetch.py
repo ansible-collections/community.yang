@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 # Copyright 2020 Red Hat
 # GNU General Public License v3.0+
@@ -17,21 +16,15 @@ else:
     import queue as queue
 
 from ansible.module_utils._text import to_text
-from ansible.errors import AnsibleError
-
-try:
-    from __main__ import display
-except ImportError:
-    from ansible.utils.display import Display
-
-    display = Display()
+from ansible.utils.display import Display
 
 try:
     import jxmlease
-
     HAS_JXMLEASE = True
 except ImportError:
     HAS_JXMLEASE = False
+
+display = Display()
 
 
 class SchemaStore(object):
@@ -105,7 +98,7 @@ class SchemaStore(object):
             result["fetched"][schema_id] = data_model
             self._schema_cache.append(schema_cache_entry)
         else:
-            raise AnsibleError("Fail to fetch '%s' yang model" % schema_id)
+            raise ValueError("Fail to fetch '%s' yang model" % schema_id)
 
         return found, data_model
 
