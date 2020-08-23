@@ -13,16 +13,20 @@ DOCUMENTATION = """
 ---
 module: fetch
 short_description: Fetch given yang model and it's dependencies
+author: Ganesh Nalawade (@ganeshrn)
 description:
     - Fetch given yang model and its dependant yang model from device using netconf rpc.
 options:
-  schema:
+  name:
     description:
       - Name of the yang model to fetched from remote host. This will also fetch all
         the dependent yang models and return as part of result
     required: true
-author:
-  - Ganesh Nalawade (@ganeshrn)
+  dir:
+    description:
+      - This is an optional argument which provide the directory path in which the fetched
+        yang modules will be saved. The name of the file is same as that of the yang module
+        name prefixed with `.yang` extension.
 """
 RETURN = """
 number_schema_fetched:
@@ -39,7 +43,7 @@ fetched:
 """
 EXAMPLES = """
 - community.yang.fetch:
-    schema: "{{ item }}"
+    name: "{{ item }}"
   loop:
     - openconfig-interface
     - openconfig-bgp

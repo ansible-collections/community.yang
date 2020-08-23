@@ -4,7 +4,7 @@
 
 - name: Fetch base and dependant openconfig-interfaces yang data models
   community.yang.fetch:
-      schema: openconfig-interfaces
+      name: openconfig-interfaces
   register: result
 
 - assert:
@@ -18,7 +18,7 @@
 
 - name: Wrong yang name
   community.yang.fetch:
-      schema: openconfig-interfacess
+      name: openconfig-interfacess
   ignore_errors: true
   register: result
 
@@ -29,7 +29,7 @@
 
 - name: Fetch base and dependant openconfig-bgp yang data models
   community.yang.fetch:
-      schema: openconfig-bgp
+      name: openconfig-bgp
   register: result
 
 - assert:

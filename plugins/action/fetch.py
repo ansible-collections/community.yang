@@ -24,13 +24,13 @@ class ActionModule(ActionBase):
         result = super(ActionModule, self).run(tmp, task_vars)
 
         try:
-            schema = self._task.args["schema"]
+            schema = self._task.args["name"]
         except KeyError as exc:
             return {
                 "failed": True,
                 "msg": "missing required argument: %s" % exc,
             }
-
+        dir_path = self._task.args.get("dir")
         socket_path = self._connection.socket_path
         conn = Connection(socket_path)
 
@@ -38,10 +38,13 @@ class ActionModule(ActionBase):
 
         result["fetched"] = dict()
         try:
-            changed, counter = ss.run(schema, result)
+            changed, counter, supported_yang_modules = ss.run(schema, result)
         except ValueError as exc:
             return {"failed": True, "msg": to_text(exc)}
 
+        if dir_path:
+            pass
         result["changed"] = changed
         result["number_schema_fetched"] = counter
+        result["supported_yang_modules"] = supported_yang_modules
         return result

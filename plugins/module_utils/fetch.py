@@ -20,6 +20,7 @@ from ansible.utils.display import Display
 
 try:
     import jxmlease
+
     HAS_JXMLEASE = True
 except ImportError:
     HAS_JXMLEASE = False
@@ -32,6 +33,7 @@ class SchemaStore(object):
         self._conn = conn
         self._schema_cache = []
         self._all_schema_list = None
+        self._all_schema_identifier_list = []
 
     def get_schema_description(self):
         if not HAS_JXMLEASE:
@@ -62,6 +64,9 @@ class SchemaStore(object):
             self._all_schema_list = res_json["data"]["netconf-state"][
                 "schemas"
             ]["schema"]
+
+        for index, schema_list in enumerate(self._all_schema_list):
+            self._all_schema_identifier_list.append(schema_list["identifier"])
         return
 
     def get_one_schema(self, schema_id, result):
@@ -79,7 +84,7 @@ class SchemaStore(object):
                 found = True
                 break
 
-        if found:
+        if schema_id in self._all_schema_identifier_list:
             content = "<identifier>%s</identifier>" % schema_id
             xmlns = "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring"
             xml_request = '<%s xmlns="%s"> %s </%s>' % (
@@ -134,4 +139,4 @@ class SchemaStore(object):
                     changed = True
                     counter += 1
 
-        return changed, counter
+        return changed, counter, self._all_schema_identifier_list
