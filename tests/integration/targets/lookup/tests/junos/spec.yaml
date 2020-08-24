@@ -1,4 +1,0 @@
----
-- debug: msg="START community.yang.spec iosxr/basic.yaml on connection={{ ansible_connection }}"
-
-- debug: msg="END community.yang.spec iosxr/basic.yaml on connection={{ ansible_connection }}"

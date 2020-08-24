@@ -15,6 +15,7 @@ short_description: Fetch the device configuration and render it in JSON format d
 description:
     - The module will fetch the configuration data for a given YANG model and render it in
       JSON format (as per RFC 7951).
+author: Ganesh Nalawade (@ganeshrn)
 options:
   get_filter:
     description:
