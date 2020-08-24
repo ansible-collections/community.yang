@@ -1,9 +1,9 @@
 ---
-- debug: msg="START community.yang.spec iosxr/basic.yaml on connection={{ ansible_connection }}"
+- debug: msg="START community.yang.spec on connection={{ ansible_connection }}"
 
 - name: Convert interface yang module to spec with default values
   set_fact:
-    interface_spec: "{{ lookup('community.yang.spec', yang_file, search_path=search_path, defaults=True) }}"
+    interface_spec: "{{ lookup('community.yang.spec', spec_yang_file, search_path=spec_search_path, defaults=True) }}"
 
 - assert:
     that:
@@ -22,7 +22,7 @@
 
 - name: Convert interface yang module to spec with no default and annotation in xml
   set_fact:
-    interface_spec: "{{ lookup('community.yang.spec', yang_file, search_path=search_path, defaults=False, annotations=True) }}"
+    interface_spec: "{{ lookup('community.yang.spec', spec_yang_file, search_path=spec_search_path, defaults=False, annotations=True) }}"
 
 - assert:
     that:
@@ -40,7 +40,7 @@
 
 - name: Convert interface yang module to spec with state data
   set_fact:
-    interface_spec: "{{ lookup('community.yang.spec', yang_file, search_path=search_path, doctype='data') }}"
+    interface_spec: "{{ lookup('community.yang.spec', spec_yang_file, search_path=spec_search_path, doctype='data') }}"
 
 - assert:
     that:
@@ -59,7 +59,7 @@
 
 - name: Wrong yang module path
   set_fact:
-    interface_spec: "{{ lookup('community.yang.spec', '/test', search_path=search_path) }}"
+    interface_spec: "{{ lookup('community.yang.spec', '/test', search_path=spec_search_path) }}"
   ignore_errors: true
   register: result
 
@@ -69,7 +69,7 @@
 
 - name: Wrong module search path
   set_fact:
-    interface_spec: "{{ lookup('community.yang.spec', yang_file, search_path='/test') }}"
+    interface_spec: "{{ lookup('community.yang.spec', spec_yang_file, search_path='/test') }}"
   ignore_errors: true
   register: result
 
@@ -77,4 +77,4 @@
     that:
       - "'invalid directory path' in result.msg"
 
-- debug: msg="END community.yang.spec iosxr/basic.yaml on connection={{ ansible_connection }}"
+- debug: msg="END community.yang.spec on connection={{ ansible_connection }}"

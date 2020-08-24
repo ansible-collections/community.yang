@@ -1,10 +1,16 @@
 ---
-- include: junos.yaml
-  when: ansible_network_os == 'junipernetworks.junos.junos'
-  tags:
-    - netconf
+- name: collect all netconf test cases
+  find:
+    paths: '{{ role_path }}/tests'
+    patterns: '{{ testcase }}.yaml'
+  register: test_cases
+  connection: local
 
-- include: iosxr.yaml
-  when: ansible_network_os == 'cisco.iosxr.iosxr'
-  tags:
-    - netconf
+- name: set test_items
+  set_fact: test_items="{{ test_cases.files | map(attribute='path') | list }}"
+
+- name: run test case (connection=ansible.netcommon.netconf)
+  include: '{{ test_case_to_run }} ansible_connection=ansible.netcommon.netconf'
+  with_items: '{{ test_items }}'
+  loop_control:
+    loop_var: test_case_to_run
