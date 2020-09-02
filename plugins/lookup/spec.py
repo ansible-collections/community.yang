@@ -18,15 +18,17 @@ DOCUMENTATION = """
         structure of yang document. The tree structure document is as per RFC 8340 which helps to consume
         the yang document along with json and xml configuration skeleton.
     options:
-      _terms:
+      file:
         description: The path points to the location of the top level yang module which
                       is to be transformed into to Ansible spec.
         required: True
+        type: str
       search_path:
         description:
           - is a colon C(:) separated list of directories to search for imported yang modules
             in the yang file mentioned in C(path) option. If the value is not given it will search in
             the same directory as that of C(yang_file).
+        type: path
       defaults:
         description:
           - This boolean flag indicates if the generated json and xml configuration schema should have
@@ -39,6 +41,7 @@ DOCUMENTATION = """
             in output.
         default: config
         choices: ['config', 'data']
+        type: bool
       annotations:
         description:
           - The boolean flag identifies if the xml skeleton should have comments describing the field or not.
@@ -180,7 +183,6 @@ RETURN = """
             </config>
 """
 import os
-
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
 from ansible_collections.community.yang.plugins.module_utils.spec import (
@@ -191,23 +193,20 @@ from ansible.utils.display import Display
 
 display = Display()
 
-
 class LookupModule(LookupBase):
-    def run(self, terms, variables, **kwargs):
+    def run(self, terms, **kwargs):
 
         res = []
         output = {}
-        try:
-            yang_file = terms[0]
-        except IndexError:
-            raise AnsibleError("the yang file must be specified")
-
-        yang_file = os.path.realpath(os.path.expanduser(yang_file))
+        defaults, annotations, schema_out_path = False, False, None
+        yang_file = kwargs.pop("yang_file", "")
         if not os.path.isfile(yang_file):
             raise AnsibleError("%s invalid file path" % yang_file)
 
         search_path = kwargs.pop("search_path", "")
-        annotations = kwargs.pop("annotations", "")
+        xml_schema = kwargs.pop("xml_schema", {})
+        json_schema = kwargs.pop("json_schema", {})
+        tree_schema = kwargs.pop("tree_schema", {})
 
         for path in search_path.split(":"):
             path = os.path.realpath(os.path.expanduser(path))
@@ -215,7 +214,6 @@ class LookupModule(LookupBase):
                 raise AnsibleError("%s is invalid directory path" % path)
 
         keep_tmp_files = kwargs.pop("keep_tmp_files", False)
-        defaults = kwargs.pop("defaults", False)
         doctype = kwargs.pop("doctype", "config")
 
         valid_doctype = ["config", "data"]
@@ -231,14 +229,32 @@ class LookupModule(LookupBase):
             doctype=doctype,
             keep_tmp_files=keep_tmp_files,
         )
+        if json_schema:
+            if "defaults" in json_schema:
+                defaults = json_schema["defaults"]
+            if "path" in json_schema:
+                schema_out_path = json_schema["path"]
         output["json_skeleton"] = genspec_obj.generate_json_schema(
-            defaults=defaults
+            schema_out_path=schema_out_path, defaults=defaults
         )
+        defaults = False
+        schema_out_path = None
+
+        if xml_schema:
+            if "defaults" in xml_schema:
+                defaults = xml_schema["defaults"]
+            if "path" in xml_schema:
+                schema_out_path = xml_schema["path"]
+            if "annotations" in xml_schema:
+                annotations = xml_schema["annotations"]
         output["xml_skeleton"] = genspec_obj.generate_xml_schema(
-            defaults=defaults, annotations=annotations
+            schema_out_path=schema_out_path, defaults=defaults, annotations=annotations
         )
-        output["tree"] = genspec_obj.generate_tree_schema()
+        schema_out_path = None
+        if tree_schema and "path" in tree_schema:
+            schema_out_path = tree_schema["path"]
+        output["tree"] = genspec_obj.generate_tree_schema(schema_out_path=schema_out_path)
 
         res.append(output)
 
-        return res
+        return output
