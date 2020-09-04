@@ -11,11 +11,14 @@ import os
 import re
 import sys
 import shutil
+import time
+import json
 import imp
 import uuid
 
 from copy import deepcopy
 
+from ansible.module_utils._text import to_text
 from ansible.module_utils.six import StringIO
 from ansible.utils.path import unfrackpath, makedirs_safe
 from ansible.errors import AnsibleError
@@ -38,6 +41,7 @@ except ImportError:
     raise AnsibleError("lxml is not installed")
 
 JSON2XML_DIR_PATH = "~/.ansible/tmp/yang/json2xml"
+XM2JSONL_DIR_PATH = "~/.ansible/tmp/xml2json"
 
 
 class Translator(object):
@@ -215,3 +219,167 @@ class Translator(object):
                 )
 
         return etree.tostring(root)
+
+    def xml_to_json(self, xml_data):
+        """
+        The method translates XML data to JSON data encoded as per YANG model (RFC 7951)
+        :param xml_data: XML data or file path containing xml data that should to translated to JSON
+        :return: data in JSON format.
+    """
+        plugindir = unfrackpath(XM2JSONL_DIR_PATH)
+        makedirs_safe(plugindir)
+
+        if os.path.isfile(xml_data):
+            # input is xml file path
+            xml_file_path = os.path.realpath(os.path.expanduser(xml_data))
+        else:
+            # input is xml string, copy it to file in temporary location
+            xml_file_path = os.path.join(
+                XM2JSONL_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "xml")
+            )
+            xml_file_path = os.path.realpath(os.path.expanduser(xml_file_path))
+            with open(xml_file_path, "w") as f:
+                if not xml_data.startswith("<?xml version"):
+                    xml_data = (
+                        '<?xml version="1.0" encoding="UTF-8"?>\n' + xml_data
+                    )
+                data = xml_data
+                f.write(data)
+
+        xml_file_path = os.path.realpath(os.path.expanduser(xml_file_path))
+
+        try:
+            # validate xml
+            etree.parse(xml_file_path)
+            display.vvvv(
+                "Parsing xml data from temporary file: %s" % xml_file_path
+            )
+        except Exception as exc:
+            if not self._keep_tmp_files:
+                shutil.rmtree(
+                    os.path.realpath(os.path.expanduser(XM2JSONL_DIR_PATH)),
+                    ignore_errors=True,
+                )
+            raise AnsibleError(
+                "Failed to load xml data: %s"
+                % (to_text(exc, errors="surrogate_or_strict"))
+            )
+
+        base_pyang_path = sys.modules["pyang"].__file__
+        pyang_exec_path = find_file_in_path("pyang")
+        pyang_exec = imp.load_source("pyang", pyang_exec_path)
+
+        saved_arg = deepcopy(sys.argv)
+        sys.modules["pyang"].__file__ = base_pyang_path
+
+        saved_stdout = sys.stdout
+        saved_stderr = sys.stderr
+        sys.stdout = sys.stderr = StringIO()
+
+        xsl_file_path = os.path.join(
+            XM2JSONL_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "xsl")
+        )
+        json_file_path = os.path.join(
+            XM2JSONL_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "json")
+        )
+        xls_file_path = os.path.realpath(os.path.expanduser(xsl_file_path))
+        json_file_path = os.path.realpath(os.path.expanduser(json_file_path))
+
+        # fill in the sys args before invoking pyang
+        sys.argv = [
+            pyang_exec_path,
+            "-f",
+            "jsonxsl",
+            "-o",
+            xls_file_path,
+            "-p",
+            self._search_path,
+            "--lax-quote-checks",
+        ] + self._yang_files
+        display.display(
+            "Generating xsl file '%s' by executing command '%s'"
+            % (xls_file_path, " ".join(sys.argv)),
+            log_only=True,
+        )
+        try:
+            pyang_exec.run()
+        except SystemExit:
+            pass
+        except Exception as e:
+            if not self._keep_tmp_files:
+                shutil.rmtree(
+                    os.path.realpath(os.path.expanduser(XM2JSONL_DIR_PATH)),
+                    ignore_errors=True,
+                )
+            raise AnsibleError(
+                "Error while generating intermediate (xsl) file: %s" % e
+            )
+        finally:
+            err = sys.stderr.getvalue()
+            if err and "error" in err.lower():
+                if not self._keep_tmp_files:
+                    shutil.rmtree(
+                        os.path.realpath(
+                            os.path.expanduser(XM2JSONL_DIR_PATH)
+                        ),
+                        ignore_errors=True,
+                    )
+                raise AnsibleError(
+                    "Error while generating (xsl) intermediate file: %s" % err
+                )
+
+        xsltproc_exec_path = find_file_in_path("xsltproc")
+
+        # fill in the sys args before invoking xsltproc
+        sys.argv = [
+            xsltproc_exec_path,
+            "-o",
+            json_file_path,
+            xsl_file_path,
+            xml_file_path,
+        ]
+        display.display(
+            "Generating json data in temp file '%s' by executing command '%s'"
+            % (json_file_path, " ".join(sys.argv)),
+            log_only=True,
+        )
+        time.sleep(5)
+        try:
+            os.system(" ".join(sys.argv))
+        except SystemExit:
+            pass
+        finally:
+            err = sys.stderr.getvalue()
+            if err and "error" in err.lower():
+                if not self._keep_tmp_files:
+                    shutil.rmtree(
+                        os.path.realpath(
+                            os.path.expanduser(XM2JSONL_DIR_PATH)
+                        ),
+                        ignore_errors=True,
+                    )
+                raise AnsibleError("Error while translating to json: %s" % err)
+            sys.argv = saved_arg
+            sys.stdout = saved_stdout
+            sys.stderr = saved_stderr
+
+        try:
+            display.vvvv(
+                "Reading output json data from temporary file: %s"
+                % json_file_path
+            )
+            with open(json_file_path, "r") as fp:
+                raw_content = fp.read()
+                content = json.loads(raw_content)
+        except Exception as e:
+            raise AnsibleError(
+                "Error while reading json document %s with content %s"
+                % (e, raw_content)
+            )
+        finally:
+            if not self._keep_tmp_files:
+                shutil.rmtree(
+                    os.path.realpath(os.path.expanduser(XM2JSONL_DIR_PATH)),
+                    ignore_errors=True,
+                )
+        return content
