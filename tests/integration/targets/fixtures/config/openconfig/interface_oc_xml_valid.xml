@@ -1,0 +1,14 @@
+<config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <interfaces xmlns="http://openconfig.net/yang/interfaces">
+    <interface>
+      <name>GigabitEthernet0/0/0/2</name>
+      <config>
+        <name>GigabitEthernet0/0/0/2</name>
+        <mtu>1024</mtu>
+        <loopback-mode>false</loopback-mode>
+        <description>configured by Ansible yang collection</description>
+        <enabled>true</enabled>
+      </config>
+    </interface>
+  </interfaces>
+</config>
