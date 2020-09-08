@@ -11,6 +11,7 @@ import sys
 import shutil
 import json
 import uuid
+import errno
 
 import subprocess
 from copy import deepcopy
@@ -37,12 +38,14 @@ YANG_SPEC_DIR_PATH = "~/.ansible/tmp/yang/spec"
 class GenerateSpec(object):
     def __init__(
         self,
-        yang_file_path,
+        yang_content=None,
+        yang_file_path=None,
         search_path=None,
         doctype="config",
         keep_tmp_files=False,
     ):
         self._yang_file_path = yang_file_path
+        self._yang_content = yang_content
         self._doctype = doctype
         self._keep_tmp_files = keep_tmp_files
         self._pyang_exec_path = find_file_in_path("pyang")
@@ -51,7 +54,21 @@ class GenerateSpec(object):
         makedirs_safe(self._plugindir)
 
         if search_path is None:
-            search_path = os.path.dirname(yang_file_path)
+            if yang_file_path:
+                search_path = os.path.dirname(yang_file_path)
+            else:
+                search_path = YANG_SPEC_DIR_PATH
+
+        if yang_file_path is None:
+            content_tmp_file_path = os.path.join(
+                YANG_SPEC_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "yang")
+            )
+            content_tmp_file_path = os.path.realpath(
+                os.path.expanduser(content_tmp_file_path)
+            )
+            with open(content_tmp_file_path, 'w') as opened_file:
+                opened_file.write(yang_content)
+            self._yang_file_path = content_tmp_file_path
 
         self._search_path = search_path
 
@@ -81,7 +98,6 @@ class GenerateSpec(object):
         tree_tmp_file_path = os.path.realpath(
             os.path.expanduser(tree_tmp_file_path)
         )
-
         # fill in the sys args before invoking pyang to retrieve tree structure
         tree_cmd = [
             self._pyang_exec_path,
@@ -107,7 +123,9 @@ class GenerateSpec(object):
                     os.path.realpath(os.path.expanduser(YANG_SPEC_DIR_PATH)),
                     ignore_errors=True,
                 )
-            raise AnsibleError("Error while generating tree file: %s" % e)
+            raise AnsibleError(
+                "Error while generating skeleton xml file: %s" % e.output
+            )
         finally:
             err = sys.stdout.getvalue()
             if err and "error" in err.lower():
@@ -130,7 +148,15 @@ class GenerateSpec(object):
             tree_schema = f.read()
 
         if schema_out_path:
-            shutil.copyfile(tree_tmp_file_path, schema_out_path)
+            try:
+                shutil.copy(tree_tmp_file_path, schema_out_path)
+            except IOError as e:
+                # ENOENT(2): file does not exist, raised also on missing dest parent dir
+                if e.errno != errno.ENOENT:
+                    raise
+                # try creating parent directories
+                os.makedirs(os.path.dirname(schema_out_path))
+                shutil.copyfile(tree_tmp_file_path, schema_out_path)
 
         if not self._keep_tmp_files:
             os.remove(tree_tmp_file_path)
@@ -160,7 +186,6 @@ class GenerateSpec(object):
         xml_tmp_file_path = os.path.realpath(
             os.path.expanduser(xml_tmp_file_path)
         )
-
         # fill in the sys args before invoking pyang to retrieve xml skeleton
         sample_xml_skeleton_cmd = [
             self._pyang_exec_path,
@@ -197,7 +222,7 @@ class GenerateSpec(object):
                     ignore_errors=True,
                 )
             raise AnsibleError(
-                "Error while generating skeleton xml file: %s" % e
+                "Error while generating skeleton xml file: %s" % e.output
             )
         finally:
             err = sys.stdout.getvalue()
@@ -222,7 +247,15 @@ class GenerateSpec(object):
             xml_schema = f.read()
 
         if schema_out_path:
-            shutil.copyfile(xml_tmp_file_path, schema_out_path)
+            try:
+                shutil.copy(xml_tmp_file_path, schema_out_path)
+            except IOError as e:
+                # ENOENT(2): file does not exist, raised also on missing dest parent dir
+                if e.errno != errno.ENOENT:
+                    raise
+                # try creating parent directories
+                os.makedirs(os.path.dirname(schema_out_path))
+                shutil.copyfile(xml_tmp_file_path, schema_out_path)
 
         if not self._keep_tmp_files:
             os.remove(xml_tmp_file_path)
@@ -237,7 +270,7 @@ class GenerateSpec(object):
                                 store the generated.
         :param defaults: If set to True the default values will be added in json schema
                          from the YANG model for the corresponding option.
-        :return: JSON scehma in string format.
+        :return: JSON schema in string format.
         """
         saved_arg = deepcopy(sys.argv)
         sys.stdout = sys.stderr = StringIO()
@@ -254,7 +287,6 @@ class GenerateSpec(object):
             "pyang_json_skeleton_plugin.py",
         )
         shutil.copy(plugin_file_src, self._plugindir)
-
         # fill in the sys args before invoking pyang to retrieve json skeleton
         sample_json_skeleton_cmd = [
             self._pyang_exec_path,
@@ -290,7 +322,7 @@ class GenerateSpec(object):
                     ignore_errors=True,
                 )
             raise AnsibleError(
-                "Error while generating skeleton json file: %s" % e
+                "Error while generating skeleton json file: %s" % e.output
             )
         finally:
             err = sys.stdout.getvalue()
@@ -315,7 +347,15 @@ class GenerateSpec(object):
             json_schema = json.load(f)
 
         if schema_out_path:
-            shutil.copyfile(json_tmp_file_path, schema_out_path)
+            try:
+                shutil.copy(json_tmp_file_path, schema_out_path)
+            except IOError as e:
+                # ENOENT(2): file does not exist, raised also on missing dest parent dir
+                if e.errno != errno.ENOENT:
+                    raise
+                # try creating parent directories
+                os.makedirs(os.path.dirname(schema_out_path))
+                shutil.copyfile(json_tmp_file_path, schema_out_path)
 
         if not self._keep_tmp_files:
             os.remove(json_tmp_file_path)

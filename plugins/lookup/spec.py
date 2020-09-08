@@ -22,11 +22,13 @@ DOCUMENTATION = """
         description: The path points to the location of the top level yang module which
                       is to be transformed into to Ansible spec.
         required: True
+        type: str
       search_path:
         description:
           - is a colon C(:) separated list of directories to search for imported yang modules
             in the yang file mentioned in C(path) option. If the value is not given it will search in
             the same directory as that of C(yang_file).
+        type: path
       defaults:
         description:
           - This boolean flag indicates if the generated json and xml configuration schema should have
@@ -39,6 +41,7 @@ DOCUMENTATION = """
             in output.
         default: config
         choices: ['config', 'data']
+        type: bool
       annotations:
         description:
           - The boolean flag identifies if the xml skeleton should have comments describing the field or not.
@@ -180,7 +183,6 @@ RETURN = """
             </config>
 """
 import os
-
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
 from ansible_collections.community.yang.plugins.module_utils.spec import (
@@ -190,7 +192,6 @@ from ansible_collections.community.yang.plugins.module_utils.spec import (
 from ansible.utils.display import Display
 
 display = Display()
-
 
 class LookupModule(LookupBase):
     def run(self, terms, variables, **kwargs):
@@ -207,7 +208,6 @@ class LookupModule(LookupBase):
             raise AnsibleError("%s invalid file path" % yang_file)
 
         search_path = kwargs.pop("search_path", "")
-        annotations = kwargs.pop("annotations", "")
 
         for path in search_path.split(":"):
             path = os.path.realpath(os.path.expanduser(path))
@@ -216,6 +216,7 @@ class LookupModule(LookupBase):
 
         keep_tmp_files = kwargs.pop("keep_tmp_files", False)
         defaults = kwargs.pop("defaults", False)
+        annotations = kwargs.pop("annotations", False)
         doctype = kwargs.pop("doctype", "config")
 
         valid_doctype = ["config", "data"]
@@ -226,7 +227,7 @@ class LookupModule(LookupBase):
             )
 
         genspec_obj = GenerateSpec(
-            yang_file,
+            yang_file_path=yang_file,
             search_path=search_path,
             doctype=doctype,
             keep_tmp_files=keep_tmp_files,
@@ -234,6 +235,8 @@ class LookupModule(LookupBase):
         output["json_skeleton"] = genspec_obj.generate_json_schema(
             defaults=defaults
         )
+        defaults = False
+
         output["xml_skeleton"] = genspec_obj.generate_xml_schema(
             defaults=defaults, annotations=annotations
         )
