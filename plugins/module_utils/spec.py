@@ -38,28 +38,37 @@ YANG_SPEC_DIR_PATH = "~/.ansible/tmp/yang/spec"
 class GenerateSpec(object):
     def __init__(
         self,
-        yang_file_path,
+        yang_content=None,
+        yang_file_path=None,
         search_path=None,
         doctype="config",
         keep_tmp_files=False,
-        xml_schema=None,
-        json_schema=None,
-        tree_schema=None
     ):
         self._yang_file_path = yang_file_path
+        self._yang_content = yang_content
         self._doctype = doctype
         self._keep_tmp_files = keep_tmp_files
         self._pyang_exec_path = find_file_in_path("pyang")
-        self.xml_schema = xml_schema,
-        self.json_schema = json_schema,
-        self.tree_schema = tree_schema,
-
 
         self._plugindir = unfrackpath(YANG_SPEC_DIR_PATH)
         makedirs_safe(self._plugindir)
 
         if search_path is None:
-            search_path = os.path.dirname(yang_file_path)
+            if yang_file_path:
+                search_path = os.path.dirname(yang_file_path)
+            else:
+                search_path = YANG_SPEC_DIR_PATH
+
+        if yang_file_path is None:
+            content_tmp_file_path = os.path.join(
+                YANG_SPEC_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "yang")
+            )
+            content_tmp_file_path = os.path.realpath(
+                os.path.expanduser(content_tmp_file_path)
+            )
+            with open(content_tmp_file_path, 'w') as opened_file:
+                opened_file.write(yang_content)
+            self._yang_file_path = content_tmp_file_path
 
         self._search_path = search_path
 
@@ -261,7 +270,7 @@ class GenerateSpec(object):
                                 store the generated.
         :param defaults: If set to True the default values will be added in json schema
                          from the YANG model for the corresponding option.
-        :return: JSON scehma in string format.
+        :return: JSON schema in string format.
         """
         saved_arg = deepcopy(sys.argv)
         sys.stdout = sys.stderr = StringIO()
@@ -278,7 +287,6 @@ class GenerateSpec(object):
             "pyang_json_skeleton_plugin.py",
         )
         shutil.copy(plugin_file_src, self._plugindir)
-
         # fill in the sys args before invoking pyang to retrieve json skeleton
         sample_json_skeleton_cmd = [
             self._pyang_exec_path,

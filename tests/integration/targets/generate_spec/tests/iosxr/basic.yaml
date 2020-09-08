@@ -1,0 +1,34 @@
+---
+- debug: msg="START community.yang.generate_spec iosxr/basic.yaml on connection={{ ansible_connection
+    }}"
+
+- set_fact:
+    expected_xml_output: "<?xml version='1.0' encoding='UTF-8'?>\n<config xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n  <interfaces xmlns=\"http://openconfig.net/yang/interfaces\">\n    <interface>\n      <name/>\n      <config>\n        <name/>\n        <type/>\n        <mtu/>\n        <description/>\n      </config>\n      <hold-time>\n        <config/>\n      </hold-time>\n      <subinterfaces>\n        <subinterface>\n          <index/>\n          <config>\n            <description/>\n          </config>\n        </subinterface>\n      </subinterfaces>\n    </interface>\n  </interfaces>\n</config>\n"
+
+- set_fact:
+    expected_tree_output: "module: openconfig-interfaces\n  +--rw interfaces\n     +--rw interface* [name]\n        +--rw name             -> ../config/name\n        +--rw config\n        |  +--rw name?            string\n        |  +--rw type             identityref\n        |  +--rw mtu?             uint16\n        |  +--rw loopback-mode?   boolean\n        |  +--rw description?     string\n        |  +--rw enabled?         boolean\n        +--ro state\n        |  +--ro name?            string\n        |  +--ro type             identityref\n        |  +--ro mtu?             uint16\n        |  +--ro loopback-mode?   boolean\n        |  +--ro description?     string\n        |  +--ro enabled?         boolean\n        |  +--ro ifindex?         uint32\n        |  +--ro admin-status     enumeration\n        |  +--ro oper-status      enumeration\n        |  +--ro last-change?     oc-types:timeticks64\n        |  +--ro counters\n        |     +--ro in-octets?             oc-yang:counter64\n        |     +--ro in-unicast-pkts?       oc-yang:counter64\n        |     +--ro in-broadcast-pkts?     oc-yang:counter64\n        |     +--ro in-multicast-pkts?     oc-yang:counter64\n        |     +--ro in-discards?           oc-yang:counter64\n        |     +--ro in-errors?             oc-yang:counter64\n        |     +--ro in-unknown-protos?     oc-yang:counter64\n        |     +--ro in-fcs-errors?         oc-yang:counter64\n        |     +--ro out-octets?            oc-yang:counter64\n        |     +--ro out-unicast-pkts?      oc-yang:counter64\n        |     +--ro out-broadcast-pkts?    oc-yang:counter64\n        |     +--ro out-multicast-pkts?    oc-yang:counter64\n        |     +--ro out-discards?          oc-yang:counter64\n        |     +--ro out-errors?            oc-yang:counter64\n        |     +--ro carrier-transitions?   oc-yang:counter64\n        |     +--ro last-clear?            oc-types:timeticks64\n        +--rw hold-time\n        |  +--rw config\n        |  |  +--rw up?     uint32\n        |  |  +--rw down?   uint32\n        |  +--ro state\n        |     +--ro up?     uint32\n        |     +--ro down?   uint32\n        +--rw subinterfaces\n           +--rw subinterface* [index]\n              +--rw index     -> ../config/index\n              +--rw config\n              |  +--rw index?         uint32\n              |  +--rw description?   string\n              |  +--rw enabled?       boolean\n              +--ro state\n                 +--ro index?          uint32\n                 +--ro description?    string\n                 +--ro enabled?        boolean\n                 +--ro name?           string\n                 +--ro ifindex?        uint32\n                 +--ro admin-status    enumeration\n                 +--ro oper-status     enumeration\n                 +--ro last-change?    oc-types:timeticks64\n                 +--ro counters\n                    +--ro in-octets?             oc-yang:counter64\n                    +--ro in-unicast-pkts?       oc-yang:counter64\n                    +--ro in-broadcast-pkts?     oc-yang:counter64\n                    +--ro in-multicast-pkts?     oc-yang:counter64\n                    +--ro in-discards?           oc-yang:counter64\n                    +--ro in-errors?             oc-yang:counter64\n                    +--ro in-unknown-protos?     oc-yang:counter64\n                    +--ro in-fcs-errors?         oc-yang:counter64\n                    +--ro out-octets?            oc-yang:counter64\n                    +--ro out-unicast-pkts?      oc-yang:counter64\n                    +--ro out-broadcast-pkts?    oc-yang:counter64\n                    +--ro out-multicast-pkts?    oc-yang:counter64\n                    +--ro out-discards?          oc-yang:counter64\n                    +--ro out-errors?            oc-yang:counter64\n                    +--ro carrier-transitions?   oc-yang:counter64\n                    +--ro last-clear?            oc-types:timeticks64\n"
+
+- name: generate spec from openconfig interface config data and store it in file
+  community.yang.generate_spec:
+    file: "{{ spec_yang_file }}"
+    search_path: "{{ spec_search_path }}"
+    doctype: config
+  register: result
+
+- name: Assert that correct xml_skeleton generated
+  assert:
+    that:
+      - "{{ expected_xml_output == result['xml_skeleton'] }}"
+
+- name: Assert that correct tree generated
+  assert:
+    that:
+      - "{{ expected_tree_output == result['tree'] }}"
+
+- name: Assert that correct json_skeleton generated
+  assert:
+    that:
+      - "'openconfig-interfaces:interfaces' in result['json_skeleton']"
+
+- debug: msg="END community.yang.generate iosxr/basic.yaml on connection={{ ansible_connection
+    }}"

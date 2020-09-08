@@ -8,85 +8,138 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+import json
 from ansible.plugins.action import ActionBase
 import os
-from ansible.errors import AnsibleError
-
-from ansible.module_utils._text import to_text
-YANG_SPEC_DIR_PATH = "~/.ansible/tmp/yang_spec"
-from ansible_collections.community.yang.plugins.lookup.spec import (
-    LookupModule,
+from ansible.module_utils._text import to_bytes
+from ansible.module_utils import basic
+from ansible.errors import AnsibleActionFail
+from ansible_collections.community.yang.plugins.module_utils.spec import (
+    GenerateSpec,
+)
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
+    convert_doc_to_ansible_module_kwargs,
+    dict_merge,
+)
+from ansible_collections.community.yang.plugins.modules.generate_spec import (
+    DOCUMENTATION,
 )
 
+
+ARGSPEC_CONDITIONALS = {
+    "required_one_of": [["file", "content"]],
+    "mutually_exclusive": [["file", "content"]],
+}
+
+def generate_argspec():
+    """ Generate an argspec
+    """
+    argspec = convert_doc_to_ansible_module_kwargs(DOCUMENTATION)
+    argspec = dict_merge(argspec, ARGSPEC_CONDITIONALS)
+    return argspec
+
+
 class ActionModule(ActionBase):
-    def run(self, terms=None, variables=None, **kwargs):
+    def __init__(self, *args, **kwargs):
+        super(ActionModule, self).__init__(*args, **kwargs)
+        self._result = {}
 
-        result = super(ActionModule, self).run(terms, variables)
+    def _fail_json(self, msg):
+        """ Replace the AnsibleModule fai_json here
+        :param msg: The message for the failure
+        :type msg: str
+        """
+        msg = msg.replace("(basic.py)", self._task.action)
+        raise AnsibleActionFail(msg)
 
-        # Read and validate yang file path
-        try:
-            yang_file = self._task.args["file"]
-        except KeyError as exc:
-            return {
-                "failed": True,
-                "msg": "missing required argument: %s" % exc,
-            }
+    def _check_argspec(self):
+        """ Load the doc and convert
+        Add the root conditionals to what was returned from the conversion
+        and instantiate an AnsibleModule to validate
+        """
+        argspec = generate_argspec()
+        basic._ANSIBLE_ARGS = to_bytes(
+            json.dumps({"ANSIBLE_MODULE_ARGS": self._task.args})
+        )
+        basic.AnsibleModule.fail_json = self._fail_json
+        basic.AnsibleModule(**argspec)
 
-        yang_file = os.path.realpath(os.path.expanduser(yang_file))
-        if not os.path.isfile(yang_file):
-            raise AnsibleError('%s invalid file path' % yang_file)
-
-        # Read search_path and validate
+    def _extended_check_argspec(self):
+        """ Check additional requirements for the argspec
+        that cannot be covered using stnd techniques
+        """
+        errors = []
+        yang_file = self._task.args.get("file") or None
+        if yang_file and not os.path.isfile(yang_file):
+            msg = '%s invalid file path' % yang_file
+            errors.append(msg)
 
         if "search_path" in self._task.args:
             search_path = self._task.args["search_path"]
-        else:
-            search_path = YANG_SPEC_DIR_PATH
-        if search_path:
             for path in search_path.split(':'):
                 path = os.path.realpath(os.path.expanduser(path))
                 if path != '' and not os.path.isdir(path):
-                    raise AnsibleError('%s is invalid directory path' % path)
+                    msg = '%s is invalid directory path' % path
+                    errors.append(msg)
+        if errors:
+            self._result["failed"] = True
+            self._result["msg"] = " ".join(errors)
 
-        # Read and validate doctype file path
-        if "doctype" in self._task.args:
-            doctype = self._task.args["doctype"]
-        else:
-            doctype = "config"
+    def run(self, tmp=None, task_vars=None):
+        """
 
-        valid_doctype = ['config', 'data']
-        if doctype not in valid_doctype:
-            raise AnsibleError('doctype value %s is invalid, valid value are %s' % (doctype, ', '.join(valid_doctype)))
+        :param terms:
+        :param variables:
+        :param kwargs:
+        :return:
+        """
+        self._check_argspec()
+        self._extended_check_argspec()
+        if self._result.get("failed"):
+            return self._result
+        result = super(ActionModule, self).run(tmp, task_vars)
 
-        if "xml_schema" in self._task.args:
-            xml_schema = self._task.args["xml_schema"]
-        else:
-            xml_schema = {}
+        yang_file = self._task.args.get("file") or None
+        yang_content = self._task.args.get("content") or None
+        search_path = self._task.args.get("search_path") or None
+        doctype = self._task.args.get("doctype") or "config"
+        xml_schema = self._task.args.get("xml_schema") or {}
+        tree_schema = self._task.args.get("tree_schema") or {}
+        json_schema = self._task.args.get("json_schema") or {}
 
-        if "tree_schema" in self._task.args:
-            tree_schema = self._task.args["tree_schema"]
-        else:
-            tree_schema = {}
+        genspec_obj = GenerateSpec(
+            yang_content=yang_content,
+            yang_file_path=yang_file,
+            search_path=search_path,
+            doctype=doctype,
+        )
+        defaults = False
+        schema_out_path = None
+        if json_schema:
+            if "defaults" in json_schema:
+                defaults = json_schema["defaults"]
+            if "path" in json_schema:
+                schema_out_path = json_schema["path"]
+        result["json_skeleton"] = genspec_obj.generate_json_schema(
+            schema_out_path=schema_out_path, defaults=defaults
+        )
+        defaults = False
+        schema_out_path = None
+        annotations = False
 
-        if "json_schema" in self._task.args:
-            json_schema = self._task.args["json_schema"]
-        else:
-            json_schema = {}
+        if xml_schema:
+            if "defaults" in xml_schema:
+                defaults = xml_schema["defaults"]
+            if "path" in xml_schema:
+                schema_out_path = xml_schema["path"]
+            if "annotations" in xml_schema:
+                annotations = xml_schema["annotations"]
+        result["xml_skeleton"] = genspec_obj.generate_xml_schema(
+            schema_out_path=schema_out_path, defaults=defaults, annotations=annotations
+        )
+        schema_out_path = None
+        if tree_schema and "path" in tree_schema:
+            schema_out_path = tree_schema["path"]
+        result["tree"] = genspec_obj.generate_tree_schema(schema_out_path=schema_out_path)
 
-        lm = LookupModule()
-        try:
-            schema_output = lm.run(
-                'community.yang.spec',
-                yang_file=yang_file,
-                search_path=search_path,
-                defaults=True,
-                doctype=doctype,
-                xml_schema=xml_schema,
-                tree_schema=tree_schema,
-                json_schema=json_schema)
-        except ValueError as exc:
-            return {"failed": True, "msg": to_text(exc)}
-        result["xml_schema"] = schema_output["xml_skeleton"]
-        result["json_schema"] = schema_output["json_skeleton"]
-        result["tree_schema"] = schema_output["tree"]
         return result
