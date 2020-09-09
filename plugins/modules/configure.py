@@ -54,6 +54,7 @@ diff:
     "before": "<rpc-reply>\n<data>\n<configuration>\n <version>17.3R1.10</version>...<--snip-->"
 """
 EXAMPLES = """
+
 - name: configure interface using structured data in JSON format
   community.yang.configure:
     config: |
