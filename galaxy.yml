@@ -2,7 +2,9 @@
 authors:
   - Ansible Network Community (ansible-network)
 dependencies:
-  "ansible.netcommon": "*"
+  - "ansible.netcommon": "*"
+  - "cisco.iosxr": "*"
+  - "junipernetworks.junos": "*"
 license_file: LICENSE
 name: yang
 namespace: community
