@@ -193,6 +193,7 @@ from ansible.utils.display import Display
 
 display = Display()
 
+
 class LookupModule(LookupBase):
     def run(self, terms, variables, **kwargs):
 

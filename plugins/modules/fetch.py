@@ -20,13 +20,22 @@ options:
   name:
     description:
       - Name of the yang model to fetched from remote host. This will also fetch all
-        the dependent yang models and return as part of result
-    required: true
+        the dependent yang models and return as part of result. If the value is set
+        to I(all) in that case all the yang models supported by remote host will be
+        fetched.
   dir:
     description:
       - This is an optional argument which provide the directory path in which the fetched
         yang modules will be saved. The name of the file is same as that of the yang module
         name prefixed with `.yang` extension.
+requirements:
+- ncclient (>=v0.5.2)
+- pyang
+notes:
+- This module requires the NETCONF system service be enabled on the remote device
+  being managed.
+- This module supports the use of connection=netconf
+- If no options provided it will return list of yang model name supported by remote host
 """
 RETURN = """
 number_schema_fetched:
@@ -42,9 +51,18 @@ fetched:
   sample: {"ietf-inet-types": "module ietf-inet-types ...<--snip-->"}
 """
 EXAMPLES = """
-- community.yang.fetch:
+- name: Fetch given yang model from remote host
+  community.yang.fetch:
     name: "{{ item }}"
   loop:
     - openconfig-interface
     - openconfig-bgp
+
+- name: Fetch list of supported yang model names
+  community.yang.fetch:
+
+- name: Fetch all the yang models supported by remote host and store it in dir location
+  community.yang.fetch:
+    name: all
+    dir: "{{ playbook_dir }}/yang_files"
 """

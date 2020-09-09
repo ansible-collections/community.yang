@@ -8,28 +8,75 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+import os
+import json
+
+from ansible.module_utils import basic
+from ansible.errors import AnsibleActionFail
 from ansible.plugins.action import ActionBase
-from ansible.module_utils._text import to_text
+from ansible.module_utils._text import to_text, to_bytes
 from ansible.module_utils.connection import Connection
+from ansible.module_utils.six import iteritems
+from ansible.utils.path import unfrackpath, makedirs_safe
 from ansible_collections.community.yang.plugins.module_utils.fetch import (
     SchemaStore,
 )
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
+    convert_doc_to_ansible_module_kwargs,
+    dict_merge,
+)
+from ansible_collections.community.yang.plugins.modules.fetch import (
+    DOCUMENTATION,
+)
+
+
+ARGSPEC_CONDITIONALS = {"mutually_exclusive": [["name", "all"]]}
+
+
+def generate_argspec():
+    """ Generate an argspec
+    """
+    argspec = convert_doc_to_ansible_module_kwargs(DOCUMENTATION)
+    argspec = dict_merge(argspec, ARGSPEC_CONDITIONALS)
+    return argspec
 
 
 class ActionModule(ActionBase):
+    def __init__(self, *args, **kwargs):
+        super(ActionModule, self).__init__(*args, **kwargs)
+        self._result = {}
+
+    def _fail_json(self, msg):
+        """ Replace the AnsibleModule fai_json here
+        :param msg: The message for the failure
+        :type msg: str
+        """
+        msg = msg.replace("(basic.py)", self._task.action)
+        raise AnsibleActionFail(msg)
+
+    def _check_argspec(self):
+        """ Load the doc and convert
+        Add the root conditionals to what was returned from the conversion
+        and instantiate an AnsibleModule to validate
+        """
+        argspec = generate_argspec()
+        basic._ANSIBLE_ARGS = to_bytes(
+            json.dumps({"ANSIBLE_MODULE_ARGS": self._task.args})
+        )
+        basic.AnsibleModule.fail_json = self._fail_json
+        basic.AnsibleModule(**argspec)
+
     def run(self, tmp=None, task_vars=None):
+        self._check_argspec()
+        if self._result.get("failed"):
+            return self._result
+
         if task_vars is None:
             task_vars = dict()
 
         result = super(ActionModule, self).run(tmp, task_vars)
 
-        try:
-            schema = self._task.args["name"]
-        except KeyError as exc:
-            return {
-                "failed": True,
-                "msg": "missing required argument: %s" % exc,
-            }
+        schema = self._task.args.get("name")
         dir_path = self._task.args.get("dir")
         socket_path = self._connection.socket_path
         conn = Connection(socket_path)
@@ -37,14 +84,32 @@ class ActionModule(ActionBase):
         ss = SchemaStore(conn)
 
         result["fetched"] = dict()
+        total_count = 0
         try:
-            changed, counter, supported_yang_modules = ss.run(schema, result)
+            supported_yang_modules = ss.get_schema_description()
+            if schema:
+                if schema == "all":
+                    for item in supported_yang_modules:
+                        changed, counter = ss.run(item, result)
+                        total_count += counter
+                else:
+                    changed, total_count = ss.run(schema, result)
         except ValueError as exc:
             return {"failed": True, "msg": to_text(exc)}
 
-        if dir_path:
-            pass
-        result["changed"] = changed
-        result["number_schema_fetched"] = counter
-        result["supported_yang_modules"] = supported_yang_modules
+        if schema:
+            if dir_path:
+                yang_dir = unfrackpath(dir_path)
+                makedirs_safe(yang_dir)
+                for name, content in iteritems(result["fetched"]):
+                    file_path = os.path.join(yang_dir, "%s.yang" % name)
+                    with open(file_path, "w+") as fp:
+                        fp.write(content)
+            result["number_schema_fetched"] = total_count
+            result["changed"] = changed
+        else:
+            result["supported_yang_modules"] = supported_yang_modules
+            result["changed"] = True
+            result["number_schema_fetched"] = 0
+
         return result
