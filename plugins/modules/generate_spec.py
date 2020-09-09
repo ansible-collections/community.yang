@@ -79,6 +79,13 @@ options:
       path:
         description: The file path to which the generated tree schema should be stored.
         type: path
+requirements:
+- ncclient (>=v0.5.2)
+- pyang
+notes:
+- This module requires the NETCONF system service be enabled on the remote device
+  being managed.
+- This module supports the use of connection=netconf
 """
 RETURN = """
 tree_schema

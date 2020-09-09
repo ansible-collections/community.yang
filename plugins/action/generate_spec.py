@@ -31,6 +31,7 @@ ARGSPEC_CONDITIONALS = {
     "mutually_exclusive": [["file", "content"]],
 }
 
+
 def generate_argspec():
     """ Generate an argspec
     """
@@ -71,15 +72,15 @@ class ActionModule(ActionBase):
         errors = []
         yang_file = self._task.args.get("file") or None
         if yang_file and not os.path.isfile(yang_file):
-            msg = '%s invalid file path' % yang_file
+            msg = "%s invalid file path" % yang_file
             errors.append(msg)
 
         if "search_path" in self._task.args:
             search_path = self._task.args["search_path"]
-            for path in search_path.split(':'):
+            for path in search_path.split(":"):
                 path = os.path.realpath(os.path.expanduser(path))
-                if path != '' and not os.path.isdir(path):
-                    msg = '%s is invalid directory path' % path
+                if path != "" and not os.path.isdir(path):
+                    msg = "%s is invalid directory path" % path
                     errors.append(msg)
         if errors:
             self._result["failed"] = True
@@ -135,11 +136,15 @@ class ActionModule(ActionBase):
             if "annotations" in xml_schema:
                 annotations = xml_schema["annotations"]
         result["xml_skeleton"] = genspec_obj.generate_xml_schema(
-            schema_out_path=schema_out_path, defaults=defaults, annotations=annotations
+            schema_out_path=schema_out_path,
+            defaults=defaults,
+            annotations=annotations,
         )
         schema_out_path = None
         if tree_schema and "path" in tree_schema:
             schema_out_path = tree_schema["path"]
-        result["tree"] = genspec_obj.generate_tree_schema(schema_out_path=schema_out_path)
+        result["tree"] = genspec_obj.generate_tree_schema(
+            schema_out_path=schema_out_path
+        )
 
         return result

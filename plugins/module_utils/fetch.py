@@ -67,7 +67,7 @@ class SchemaStore(object):
 
         for index, schema_list in enumerate(self._all_schema_list):
             self._all_schema_identifier_list.append(schema_list["identifier"])
-        return
+        return self._all_schema_identifier_list
 
     def get_one_schema(self, schema_id, result):
         if self._all_schema_list is None:
@@ -139,4 +139,4 @@ class SchemaStore(object):
                     changed = True
                     counter += 1
 
-        return changed, counter, self._all_schema_identifier_list
+        return changed, counter

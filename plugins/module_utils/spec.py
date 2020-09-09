@@ -66,7 +66,7 @@ class GenerateSpec(object):
             content_tmp_file_path = os.path.realpath(
                 os.path.expanduser(content_tmp_file_path)
             )
-            with open(content_tmp_file_path, 'w') as opened_file:
+            with open(content_tmp_file_path, "w") as opened_file:
                 opened_file.write(yang_content)
             self._yang_file_path = content_tmp_file_path
 
