@@ -1,0 +1,7 @@
+---
+- project:
+    check:
+      jobs:
+        - ansible-collections-community-yang-units:
+            vars:
+              ansible_test_collections: true
