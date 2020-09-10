@@ -1,0 +1,23 @@
+---
+testcase: '*'
+
+# variables for spec lookup plugin
+spec_yang_file: "{{ role_path }}/../../../fixtures/files/openconfig/interfaces/openconfig-interfaces.yang"
+spec_search_path: "{{ role_path }}/../../../fixtures/files/"
+
+# variables for json2xml lookup plugin
+json2xml_yang_file: "{{ role_path }}/../../../fixtures/files/openconfig/interfaces/openconfig-interfaces.yang"
+json2xml_search_path: "{{ role_path }}/../../../fixtures/files/"
+
+json2xml_interface_valid_config: "{{ role_path }}/../../../fixtures/config/openconfig/interface_oc_json_valid.json"
+json2xml_interface_invalid_config: "{{ role_path }}/../../../fixtures/config/openconfig/interface_oc_json_invalid.json"
+
+json2xml_multi_yang_file: "{{ role_path }}/../../../fixtures/files/ietf/*.yang"
+json2xml_multi_valid_config: "{{ role_path }}/../../../fixtures/config/ietf/multi_ietf_json_valid.json"
+json2xml_multi_invalid_config: "{{ role_path }}/../../../fixtures/config/ietf/multi_ietf_json_invalid.json"
+
+xml2json_yang_file: "{{ role_path }}/../../../fixtures/files/openconfig/interfaces/openconfig-interfaces.yang"
+xml2json_search_path: "{{ role_path }}/../../../fixtures/files/"
+
+xml2json_interface_valid_xml_config: "{{ role_path }}/../../../fixtures/config/openconfig/interface_oc_xml_valid.xml"
+xml2json_interface_invalid_xml_config: "{{ role_path }}/../../../fixtures/config/openconfig/interface_oc_xml_invalid.xml"

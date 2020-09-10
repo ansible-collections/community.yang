@@ -1,0 +1,44 @@
+---
+- debug: msg="START community.yang.xml2json on connection={{ ansible_connection }}"
+
+- name: Convert interface xml config to json
+  set_fact:
+    interface_oc_json: "{{ lookup('community.yang.xml2json', xml2json_interface_valid_xml_config, yang_file=xml2json_yang_file, search_path=xml2json_search_path) }}"
+
+- assert:
+    that:
+      - "'openconfig-interfaces:interfaces' in interface_oc_json"
+      - interface_oc_json['openconfig-interfaces:interfaces']['interface'][0]['name'] == 'GigabitEthernet0/0/0/2'
+      - interface_oc_json['openconfig-interfaces:interfaces']['interface'][0]['config']['mtu'] == 1024
+
+- name: Wrong yang module path
+  set_fact:
+    interface_oc_json: "{{ lookup('community.yang.xml2json', xml2json_interface_valid_xml_config, yang_file='/test', search_path=xml2json_search_path) }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - "'invalid file path' in result.msg"
+
+- name: Wrong module search path
+  set_fact:
+    interface_oc_json: "{{ lookup('community.yang.xml2json', xml2json_interface_valid_xml_config, yang_file=xml2json_yang_file, search_path='/test') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - "'invalid directory path' in result.msg"
+
+- name: invalid input json configuration
+  set_fact:
+    interface_oc_json: "{{ lookup('community.yang.xml2json', xml2json_interface_invalid_xml_config, yang_file=xml2json_yang_file, search_path=xml2json_search_path) }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - "result.failed == True"
+
+- debug: msg="END community.yang.xml2json on connection={{ ansible_connection }}"
