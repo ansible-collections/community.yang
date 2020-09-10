@@ -20,8 +20,7 @@ description:
 options:
   config:
     description:
-      - The filter in xml string format to fetch a subset of running-configuration for the YANG model
-        given in C(file) option.
+      - The running-configuration to be pushed onto the device in JSON format (as per RFC 7951).
     type: str
     required: True
   get_filter:
