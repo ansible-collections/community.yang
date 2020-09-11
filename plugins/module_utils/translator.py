@@ -373,8 +373,8 @@ class Translator(object):
                 content = json.loads(raw_content)
         except Exception as e:
             raise AnsibleError(
-                "Error while reading json document %s with content %s"
-                % (e, raw_content)
+                "Error while reading json document %s from path %s"
+                % (e, json_file_path)
             )
         finally:
             if not self._keep_tmp_files:
