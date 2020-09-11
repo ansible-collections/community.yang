@@ -329,7 +329,8 @@ class Translator(object):
 
         xsltproc_exec_path = find_file_in_path("xsltproc")
         if not xsltproc_exec_path:
-            raise AnsibleError("xsltproc is not installed")
+            raise AnsibleError("xsltproc executable not found."
+                               " Install 'libxml2-dev' and 'libxslt-dev' packages")
 
         # fill in the sys args before invoking xsltproc
         sys.argv = [
