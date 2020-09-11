@@ -4,5 +4,5 @@ flake8
 mock ; python_version < '3.5'
 pytest-xdist
 yamllint
-libxml2-dev 
+lxml 
 libxslt-dev
