@@ -296,10 +296,9 @@ class Translator(object):
             self._search_path,
             "--lax-quote-checks",
         ] + self._yang_files
-        display.display(
+        display.vvvv(
             "Generating xsl file '%s' by executing command '%s'"
-            % (xls_file_path, " ".join(sys.argv)),
-            log_only=True,
+            % (xls_file_path, " ".join(sys.argv))
         )
         try:
             pyang_exec.run()
@@ -329,6 +328,8 @@ class Translator(object):
                 )
 
         xsltproc_exec_path = find_file_in_path("xsltproc")
+        if not xsltproc_exec_path:
+            raise AnsibleError("xsltproc is not installed")
 
         # fill in the sys args before invoking xsltproc
         sys.argv = [
@@ -338,10 +339,9 @@ class Translator(object):
             xsl_file_path,
             xml_file_path,
         ]
-        display.display(
+        display.vvvv(
             "Generating json data in temp file '%s' by executing command '%s'"
-            % (json_file_path, " ".join(sys.argv)),
-            log_only=True,
+            % (json_file_path, " ".join(sys.argv))
         )
         time.sleep(5)
         try:
