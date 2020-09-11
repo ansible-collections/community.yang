@@ -123,7 +123,7 @@ class ActionModule(ActionBase):
                 )
             )
 
-        if result.get('failed'):
+        if result.get("failed"):
             return result
         # convert XML data to JSON data as per RFC 7951 format
         tl = Translator(yang_file, search_path=search_path)
