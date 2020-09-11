@@ -1,0 +1,5 @@
+---
+- project:
+    templates:
+      - ansible-collections-community-yang-cisco-iosxr
+      - ansible-collections-community-yang-juniper-junos
