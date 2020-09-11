@@ -123,9 +123,10 @@ class ActionModule(ActionBase):
                 )
             )
 
+        if result.get("failed"):
+            return result
         # convert XML data to JSON data as per RFC 7951 format
         tl = Translator(yang_file, search_path=search_path)
-
         result["json_data"] = tl.xml_to_json(result["stdout"])
         result["xml_data"] = result["stdout"]
         result.pop("stdout", None)

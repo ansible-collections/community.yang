@@ -47,15 +47,13 @@
           - "'openconfig-routing-policy' in result.fetched"
           - "'openconfig-types' in result.fetched"
 
-- name: Test for required options
+- name: Test for supported_yang_modules in result
   community.yang.fetch:
-  ignore_errors: true
   register: result
 
 - assert:
       that:
-          - "result.failed == true"
-          - "'missing required argument' in result.msg"
+          - "'supported_yang_modules' in result"
 
 - name: Fetch all the yang models supported by remote host and store it in dir location
   community.yang.fetch:

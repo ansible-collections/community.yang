@@ -106,10 +106,10 @@ class ActionModule(ActionBase):
                     with open(file_path, "w+") as fp:
                         fp.write(content)
             result["number_schema_fetched"] = total_count
-            result["changed"] = changed
+            result["changed"] = True
         else:
             result["supported_yang_modules"] = supported_yang_modules
-            result["changed"] = True
+            result["changed"] = False
             result["number_schema_fetched"] = 0
 
         return result
