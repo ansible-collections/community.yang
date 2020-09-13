@@ -1,0 +1,6 @@
+---
+- debug: msg="START community.yang.configure junos/basic.yaml on connection={{ ansible_connection
+    }}"
+
+- debug: msg="END community.yang.configure junos/basic.yaml on connection={{ ansible_connection
+    }}"

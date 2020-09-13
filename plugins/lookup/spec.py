@@ -223,7 +223,7 @@ class LookupModule(LookupBase):
         valid_doctype = ["config", "data"]
         if doctype not in valid_doctype:
             raise AnsibleError(
-                "doctpe value %s is invalid, valid value are %s"
+                "doctype value %s is invalid, valid value are %s"
                 % (path, ", ".join(valid_doctype))
             )
 

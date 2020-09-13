@@ -121,7 +121,7 @@ class ActionModule(ActionBase):
                 defaults = json_schema["defaults"]
             if "path" in json_schema:
                 schema_out_path = json_schema["path"]
-        result["json_skeleton"] = genspec_obj.generate_json_schema(
+        result["json_schema"] = genspec_obj.generate_json_schema(
             schema_out_path=schema_out_path, defaults=defaults
         )
         defaults = False
@@ -135,7 +135,7 @@ class ActionModule(ActionBase):
                 schema_out_path = xml_schema["path"]
             if "annotations" in xml_schema:
                 annotations = xml_schema["annotations"]
-        result["xml_skeleton"] = genspec_obj.generate_xml_schema(
+        result["xml_schema"] = genspec_obj.generate_xml_schema(
             schema_out_path=schema_out_path,
             defaults=defaults,
             annotations=annotations,
@@ -143,7 +143,7 @@ class ActionModule(ActionBase):
         schema_out_path = None
         if tree_schema and "path" in tree_schema:
             schema_out_path = tree_schema["path"]
-        result["tree"] = genspec_obj.generate_tree_schema(
+        result["tree_schema"] = genspec_obj.generate_tree_schema(
             schema_out_path=schema_out_path
         )
 

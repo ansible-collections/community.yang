@@ -1,0 +1,6 @@
+---
+testcase: '*'
+
+# variables for community.yang.get module
+configure_yang_file: "{{ role_path }}/../fixtures/files/cisco/iosxr/*.yang"
+configure_search_path: "{{ role_path }}/../fixtures/files/cisco/iosxr"

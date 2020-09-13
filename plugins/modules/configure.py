@@ -12,6 +12,7 @@ DOCUMENTATION = """
 ---
 module: configure
 short_description: Reads the input configuration in JSON format and pushes to the remote host over netconf
+author: Rohit Thakur (@rohitthakur2590)
 description:
     - The module takes the JSON configuration as input.
     - Pre-validates the config with the corresponding YANG model.

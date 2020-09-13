@@ -15,20 +15,20 @@
     doctype: config
   register: result
 
-- name: Assert that correct xml_skeleton generated
+- name: Assert that correct xml_schema generated
   assert:
     that:
-      - "{{ expected_xml_output == result['xml_skeleton'] }}"
+      - "{{ expected_xml_output == result['xml_schema'] }}"
 
-- name: Assert that correct tree generated
+- name: Assert that correct tree schema generated
   assert:
     that:
-      - "{{ expected_tree_output == result['tree'] }}"
+      - "{{ expected_tree_output == result['tree_schema'] }}"
 
-- name: Assert that correct json_skeleton generated
+- name: Assert that correct json_schema generated
   assert:
     that:
-      - "'openconfig-interfaces:interfaces' in result['json_skeleton']"
+      - "'openconfig-interfaces:interfaces' in result['json_schema']"
 
-- debug: msg="END community.yang.generate iosxr/basic.yaml on connection={{ ansible_connection
+- debug: msg="END community.yang.generate_spec iosxr/basic.yaml on connection={{ ansible_connection
     }}"

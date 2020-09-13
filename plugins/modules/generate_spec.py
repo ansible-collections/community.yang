@@ -12,6 +12,7 @@ DOCUMENTATION = """
 ---
 module: generate_spec
 short_description: Generate JSON/XML schema and tree representation for given YANG model
+author: Rohit Thakur (@rohitthakur2590)
 description:
     - The module will be read the given Yang model and generate the corresponding JSON, XML
       schema and the YANG tree representation (as per RFC 8340) of the model and return in the
@@ -88,10 +89,11 @@ notes:
 - This module supports the use of connection=netconf
 """
 RETURN = """
-tree_schema
-description: The tree schema representation of yang scehma as per RFC 8340
-type: dict
-sample: |
+tree_schema:
+  description: The tree schema representation of yang scehma as per RFC 8340
+  returned: always
+  type: dict
+  sample: |
     module: openconfig-interfaces
       +--rw interfaces
          +--rw interface* [name]
@@ -115,9 +117,10 @@ sample: |
             |  +--ro oper-status      enumeration
             |  +--ro last-change?     oc-types:timeticks64
 json_schema:
-description: The json schema generated from yang document
-type: dict
-sample: |
+  description: The json schema generated from yang document
+  returned: always
+  type: dict
+  sample: |
     {
         "openconfig-interfaces:interfaces": {
             "interface": [
@@ -153,9 +156,10 @@ sample: |
             ]
         }
 xml_schema:
-description: The xml configuration schema generated from yang document
-type: dict
-sample: |
+  description: The xml configuration schema generated from yang document
+  returned: always
+  type: dict
+  sample: |
     <config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
       <interfaces xmlns="http://openconfig.net/yang/interfaces">
         <interface>
@@ -200,12 +204,12 @@ EXAMPLES = """
     search_path: "{{ playbook_dir }}/openconfig/public/release/models:pyang/modules"
     doctype: config
     json_schema:
-      path: "~/.ansible/yang/spec/{{ inventory_hostname }}/openconfig-interfaces-config.json
+      path: "~/.ansible/yang/spec/{{ inventory_hostname }}/openconfig-interfaces-config.json"
       defaults: True
     xml_schema:
-      path: "~/.ansible/yang/spec/{{ inventory_hostname }}/openconfig-interfaces-config.xml
+      path: "~/.ansible/yang/spec/{{ inventory_hostname }}/openconfig-interfaces-config.xml"
       defaults: True
       annotations: True
     tree_schema:
-      path: "~/.ansible/yang/spec/{{ inventory_hostname }}/openconfig-interfaces-config.tree
+      path: "~/.ansible/yang/spec/{{ inventory_hostname }}/openconfig-interfaces-config.tree"
 """
