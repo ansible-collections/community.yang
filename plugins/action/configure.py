@@ -8,7 +8,6 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-import sys
 import glob
 import json
 from ansible.plugins.action import ActionBase
@@ -20,7 +19,7 @@ import uuid
 from ansible.errors import AnsibleError
 
 try:
-    from lxml.etree import tostring, fromstring, XMLSyntaxError, XMLParser
+    from lxml.etree import tostring, fromstring, XMLParser
 except ImportError:
     from xml.etree.ElementTree import tostring, fromstring
 
@@ -107,7 +106,7 @@ class ActionModule(ActionBase):
             for path in search_path.split(":"):
                 path = os.path.realpath(os.path.expanduser(path))
                 if path != "" and not os.path.isdir(path):
-                    msg = "%s is invalid directory path" % path
+                    msg = "%s is invalid search_path directory" % path
                     errors.append(msg)
         if errors:
             self._result["failed"] = True
@@ -167,6 +166,7 @@ class ActionModule(ActionBase):
         xml_data = to_text(tostring(xml_data))
         xml_data = remove_namespaces(xml_data)
 
+        xml_data = xml_data.replace('<interfaces>', '<interfaces xmlns="http://openconfig.net/yang/interfaces">')
         xml_data = fromstring(bytes(xml_data, encoding="utf-8"))
         xml_data = to_text(tostring(xml_data))
 
@@ -193,5 +193,5 @@ class ActionModule(ActionBase):
                     wrap_async=self._task.async_val,
                 )
             )
-
+        result.pop("server_capabilities", None)
         return result
