@@ -20,21 +20,9 @@ import uuid
 from ansible.errors import AnsibleError
 
 try:
-    from lxml.etree import (
-        tostring,
-        fromstring,
-        XMLSyntaxError,
-        XMLParser,
-        parse,
-        XML,
-    )
+    from lxml.etree import tostring, fromstring, XMLSyntaxError, XMLParser
 except ImportError:
     from xml.etree.ElementTree import tostring, fromstring
-
-    if sys.version_info < (2, 7):
-        from xml.parsers.expat import ExpatError as XMLSyntaxError
-    else:
-        from xml.etree.ElementTree import ParseError as XMLSyntaxError
 
 from ansible.module_utils.connection import (
     ConnectionError as AnsibleConnectionError,
@@ -44,7 +32,6 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.n
 )
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
     convert_doc_to_ansible_module_kwargs,
-    dict_merge,
 )
 from ansible_collections.community.yang.plugins.modules.configure import (
     DOCUMENTATION,
