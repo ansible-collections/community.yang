@@ -4,22 +4,8 @@
 
 - name: configure interface configuration using cisco iosxr yang model
   community.yang.configure:
-    config: |
-      {
-        "openconfig-interfaces:interfaces": {
-          "interface": [
-            {
-              "name" : "GigabitEthernet0/0/0/2",
-              "config":
-              {
-                "description": "configured with Ansible",
-                "name" : "GigabitEthernet0/0/0/2"
-              }
+    config: "{{ lookup('file', './iosxr_interfaces_reset_config.json') | to_json }}"
 
-            }
-          ]
-        }
-      }
     get_filter: |
         <interface-configurations xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-ifmgr-cfg"><interface-configuration>
         </interface-configuration></interface-configurations>
@@ -28,22 +14,7 @@
 
 - name: configure interface configuration using cisco iosxr yang model
   community.yang.configure:
-    config: |
-      {
-        "openconfig-interfaces:interfaces": {
-          "interface": [
-            {
-              "name" : "GigabitEthernet0/0/0/2",
-              "config":
-              {
-                "description": "configured with yang collection",
-                "name" : "GigabitEthernet0/0/0/2"
-              }
-
-            }
-          ]
-        }
-      }
+    config: "{{ lookup('file', './iosxr_interfaces_config.json') | to_json }}"
     get_filter: |
         <interface-configurations xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-ifmgr-cfg"><interface-configuration>
         </interface-configuration></interface-configurations>
@@ -61,22 +32,7 @@
 
 - name: test for invalid yang_file path
   community.yang.configure:
-    config: |
-      {
-        "openconfig-interfaces:interfaces": {
-          "interface": [
-            {
-              "name" : "GigabitEthernet0/0/0/2",
-              "config":
-              {
-                "description": "test openconfig",
-                "name" : "GigabitEthernet0/0/0/2"
-              }
-
-            }
-          ]
-        }
-      }
+    config: "{{ lookup('file', './iosxr_interfaces_config.json') | to_json }}"
     get_filter: |
         <interface-configurations xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-ifmgr-cfg"><interface-configuration>
         </interface-configuration></interface-configurations>
@@ -92,22 +48,7 @@
 
 - name: test for invalid search_path value
   community.yang.configure:
-    config: |
-      {
-        "openconfig-interfaces:interfaces": {
-          "interface": [
-            {
-              "name" : "GigabitEthernet0/0/0/2",
-              "config":
-              {
-                "description": "test openconfig",
-                "name" : "GigabitEthernet0/0/0/2"
-              }
-
-            }
-          ]
-        }
-      }
+    config: "{{ lookup('file', './iosxr_interfaces_config.json') | to_json }}"
     get_filter: |
         <interface-configurations xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-ifmgr-cfg"><interface-configuration>
         </interface-configuration></interface-configurations>

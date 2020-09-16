@@ -15,8 +15,6 @@ import os
 from ansible.module_utils._text import to_bytes, to_text
 from ansible.module_utils import basic
 from ansible.errors import AnsibleActionFail
-import uuid
-from ansible.errors import AnsibleError
 
 try:
     from lxml.etree import tostring, fromstring, XMLParser
@@ -25,9 +23,6 @@ except ImportError:
 
 from ansible.module_utils.connection import (
     ConnectionError as AnsibleConnectionError,
-)
-from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.netconf import (
-    remove_namespaces,
 )
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
     convert_doc_to_ansible_module_kwargs,
@@ -126,31 +121,9 @@ class ActionModule(ActionBase):
             return self._result
         result = super(ActionModule, self).run(tmp, task_vars)
 
-        json_config = self._task.args.get("config") or None
+        json_config = json.loads(self._task.args.get("config") or {})
         yang_file = self._task.args.get("file") or None
         search_path = self._task.args.get("search_path") or None
-
-        if json_config:
-            config_tmp_file_path = os.path.join(
-                JSON2XML_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "json")
-            )
-            config_tmp_file_path = os.path.realpath(
-                os.path.expanduser(config_tmp_file_path)
-            )
-            with open(config_tmp_file_path, "w") as opened_file:
-                opened_file.write(json_config)
-            json_config = os.path.realpath(
-                os.path.expanduser(config_tmp_file_path)
-            )
-            try:
-                # validate json
-                with open(json_config) as fp:
-                    json.load(fp)
-            except Exception as exc:
-                raise AnsibleError(
-                    "Failed to load json configuration: %s"
-                    % (to_text(exc, errors="surrogate_or_strict"))
-                )
         if not (
             hasattr(self._connection, "socket_path")
             and self._connection.socket_path is not None
@@ -164,12 +137,6 @@ class ActionModule(ActionBase):
         parser = XMLParser(ns_clean=True, recover=True, encoding="utf-8")
         xml_data = fromstring(xml_data, parser=parser)
         xml_data = to_text(tostring(xml_data))
-        xml_data = remove_namespaces(xml_data)
-
-        xml_data = xml_data.replace('<interfaces>', '<interfaces xmlns="http://openconfig.net/yang/interfaces">')
-        xml_data = fromstring(bytes(xml_data, encoding="utf-8"))
-        xml_data = to_text(tostring(xml_data))
-
         module = "ansible.netcommon.netconf_config"
 
         if not self._shared_loader_obj.module_loader.has_plugin(module):
