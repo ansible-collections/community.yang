@@ -34,10 +34,6 @@ from ansible_collections.community.yang.plugins.module_utils.translator import (
     Translator,
 )
 
-JSON2XML_DIR_PATH = "~/.ansible/tmp/yang/json2xml"
-
-_XML_PARSER = None
-
 
 def generate_argspec():
     """ Generate an argspec

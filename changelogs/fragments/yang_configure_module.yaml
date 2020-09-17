@@ -1,0 +1,3 @@
+---
+major_changes:
+  - Added configure module to push json format configuration on to remote host over netconf connection.
