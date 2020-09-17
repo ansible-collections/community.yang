@@ -115,5 +115,5 @@ EXAMPLES = """
         <interface-configurations xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-ifmgr-cfg"><interface-configuration>
         </interface-configuration></interface-configurations>
     file: "{{ playbook_dir }}/YangModels/yang/tree/master/vendor/cisco/xr/613/*.yang"
-    search_path: "{{ playbook_dir }}/openconfig/public/release/models:{{ playbook_dir }}/pyang/modules"
+    search_path: "{{ playbook_dir }}/YangModels/yang/tree/master/vendor/cisco/xr/613:{{ playbook_dir }}/pyang/modules"
 """
