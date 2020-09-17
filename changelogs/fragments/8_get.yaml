@@ -1,0 +1,3 @@
+---
+major_changes:
+  - Added get module (https://github.com/ansible-collections/community.yang/pull/8)
