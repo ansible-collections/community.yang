@@ -1,0 +1,3 @@
+---
+major_changes:
+  - Added spec lookup plugin (https://github.com/ansible-collections/community.yang/pull/4)

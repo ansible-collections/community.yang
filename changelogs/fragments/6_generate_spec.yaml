@@ -1,0 +1,3 @@
+---
+major_changes:
+  - Added generate_spec module (https://github.com/ansible-collections/community.yang/pull/6)

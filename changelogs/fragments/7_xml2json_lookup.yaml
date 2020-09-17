@@ -1,0 +1,3 @@
+---
+major_changes:
+  - Added xml2json lookup plugin (https://github.com/ansible-collections/community.yang/pull/7)
