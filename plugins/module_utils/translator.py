@@ -104,11 +104,30 @@ class Translator(object):
         sys.stdout = sys.stderr = StringIO()
 
         plugin_instance = str(uuid.uuid4())
-
         plugindir = unfrackpath(JSON2XML_DIR_PATH)
         makedirs_safe(plugindir)
         makedirs_safe(os.path.join(plugindir, plugin_instance))
 
+        if not os.path.isfile(json_data):
+            # input is xml string, copy it to file in temporary location
+            json_file_path = os.path.join(
+                JSON2XML_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "json")
+            )
+            json_file_path = os.path.realpath(
+                os.path.expanduser(json_file_path)
+            )
+            with open(json_file_path, "w") as f:
+                f.write(json_data)
+            json_data = os.path.realpath(os.path.expanduser(json_file_path))
+        try:
+            # validate json
+            with open(json_data) as fp:
+                json.load(fp)
+        except Exception as exc:
+            raise AnsibleError(
+                "Failed to load json configuration: %s"
+                % (to_text(exc, errors="surrogate_or_strict"))
+            )
         jtox_file_path = os.path.join(
             JSON2XML_DIR_PATH,
             plugin_instance,

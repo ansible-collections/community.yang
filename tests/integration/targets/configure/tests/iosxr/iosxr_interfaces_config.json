@@ -1,0 +1,15 @@
+{
+  "openconfig-interfaces:interfaces": {
+    "interface": [
+      {
+        "name" : "GigabitEthernet0/0/0/2",
+        "config":
+        {
+          "description": "configured with Ansible",
+          "name" : "GigabitEthernet0/0/0/2"
+        }
+
+      }
+    ]
+  }
+}

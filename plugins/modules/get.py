@@ -77,9 +77,10 @@ notes:
 
 RETURN = """
 json_data:
-description: The running configuration in json format
-type: dict
-sample: |
+  description: The running configuration in json format
+  returned: always
+  type: dict
+  sample: |
     {
         "openconfig-interfaces:interfaces":
          {
@@ -94,19 +95,20 @@ sample: |
          }
     }
 xml_data:
-description: The running configuration in xml format
-type: str
-sample: |
-<data xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" xmlns:nc=\"urn:ietf:params:xml:ns:netconf:base:1.0\">
-  <interface-configurations xmlns=\"http://cisco.com/ns/yang/Cisco-IOS-XR-ifmgr-cfg\">
-    <interface-configuration>
-        <active>act</active>
-        <interface-name>GigabitEthernet0/0/0/2</interface-name>
-        <description>configured by Ansible yang collection</description>
-        <mtu>1024</mtu>
-    </interface-configuration>
-  </interface-configurations>
-</data>
+  description: The running configuration in xml format
+  returned: always
+  type: str
+  sample: |
+     <data xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" xmlns:nc=\"urn:ietf:params:xml:ns:netconf:base:1.0\">
+       <interface-configurations xmlns=\"http://cisco.com/ns/yang/Cisco-IOS-XR-ifmgr-cfg\">
+         <interface-configuration>
+             <active>act</active>
+             <interface-name>GigabitEthernet0/0/0/2</interface-name>
+             <description>configured by Ansible yang collection</description>
+             <mtu>1024</mtu>
+         </interface-configuration>
+       </interface-configurations>
+     </data>
 """
 EXAMPLES = """
 - name: fetch interface configuration and return it in JSON format

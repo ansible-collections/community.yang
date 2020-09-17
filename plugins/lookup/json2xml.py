@@ -76,12 +76,9 @@ try:
 except ImportError:
     raise AnsibleError("pyang is not installed")
 
-try:
-    from __main__ import display
-except ImportError:
-    from ansible.utils.display import Display
+from ansible.utils.display import Display
 
-    display = Display()
+display = Display()
 
 
 class LookupModule(LookupBase):

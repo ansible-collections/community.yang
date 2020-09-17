@@ -8,35 +8,37 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+import glob
 import json
 from ansible.plugins.action import ActionBase
 import os
-from ansible.module_utils._text import to_bytes
+from ansible.module_utils._text import to_bytes, to_text
 from ansible.module_utils import basic
 from ansible.errors import AnsibleActionFail
-from ansible_collections.community.yang.plugins.module_utils.spec import (
-    GenerateSpec,
+
+try:
+    from lxml.etree import tostring, fromstring, XMLParser
+except ImportError:
+    from xml.etree.ElementTree import tostring, fromstring
+
+from ansible.module_utils.connection import (
+    ConnectionError as AnsibleConnectionError,
 )
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
     convert_doc_to_ansible_module_kwargs,
-    dict_merge,
 )
-from ansible_collections.community.yang.plugins.modules.generate_spec import (
+from ansible_collections.community.yang.plugins.modules.configure import (
     DOCUMENTATION,
 )
-
-
-ARGSPEC_CONDITIONALS = {
-    "required_one_of": [["file", "content"]],
-    "mutually_exclusive": [["file", "content"]],
-}
+from ansible_collections.community.yang.plugins.module_utils.translator import (
+    Translator,
+)
 
 
 def generate_argspec():
     """ Generate an argspec
     """
     argspec = convert_doc_to_ansible_module_kwargs(DOCUMENTATION)
-    argspec = dict_merge(argspec, ARGSPEC_CONDITIONALS)
     return argspec
 
 
@@ -70,17 +72,32 @@ class ActionModule(ActionBase):
         that cannot be covered using stnd techniques
         """
         errors = []
-        yang_file = self._task.args.get("file") or None
-        if yang_file and not os.path.isfile(yang_file):
-            msg = "%s invalid file path" % yang_file
+        config = self._task.args.get("config") or None
+        try:
+            # validate json
+            json.loads(config)
+        except Exception as exc:
+            msg = "Failed to load json configuration: %s" % (
+                to_text(exc, errors="surrogate_or_strict")
+            )
             errors.append(msg)
+
+        yang_file = self._task.args.get("file") or None
+        if yang_file:
+            yang_file = os.path.realpath(os.path.expanduser(yang_file))
+            if not os.path.isfile(yang_file):
+                # Maybe we are passing a glob?
+                _yang_files = glob.glob(yang_file)
+                if not _yang_files:
+                    msg = "%s invalid yang_file path" % yang_file
+                    errors.append(msg)
 
         if "search_path" in self._task.args:
             search_path = self._task.args["search_path"]
             for path in search_path.split(":"):
                 path = os.path.realpath(os.path.expanduser(path))
                 if path != "" and not os.path.isdir(path):
-                    msg = "%s is invalid directory path" % path
+                    msg = "%s is invalid search_path directory" % path
                     errors.append(msg)
         if errors:
             self._result["failed"] = True
@@ -100,51 +117,44 @@ class ActionModule(ActionBase):
             return self._result
         result = super(ActionModule, self).run(tmp, task_vars)
 
+        json_config = json.loads(self._task.args.get("config") or {})
         yang_file = self._task.args.get("file") or None
-        yang_content = self._task.args.get("content") or None
         search_path = self._task.args.get("search_path") or None
-        doctype = self._task.args.get("doctype") or "config"
-        xml_schema = self._task.args.get("xml_schema") or {}
-        tree_schema = self._task.args.get("tree_schema") or {}
-        json_schema = self._task.args.get("json_schema") or {}
+        if not (
+            hasattr(self._connection, "socket_path")
+            and self._connection.socket_path is not None
+        ):
+            raise AnsibleConnectionError(
+                "netconf connection to remote host in not active"
+            )
+        tl = Translator(yang_file, search_path)
+        xml_data = tl.json_to_xml(json_config)
 
-        genspec_obj = GenerateSpec(
-            yang_content=yang_content,
-            yang_file_path=yang_file,
-            search_path=search_path,
-            doctype=doctype,
-        )
-        defaults = False
-        schema_out_path = None
-        if json_schema:
-            if "defaults" in json_schema:
-                defaults = json_schema["defaults"]
-            if "path" in json_schema:
-                schema_out_path = json_schema["path"]
-        result["json_schema"] = genspec_obj.generate_json_schema(
-            schema_out_path=schema_out_path, defaults=defaults
-        )
-        defaults = False
-        schema_out_path = None
-        annotations = False
+        parser = XMLParser(ns_clean=True, recover=True, encoding="utf-8")
+        xml_data = fromstring(xml_data, parser=parser)
+        xml_data = to_text(tostring(xml_data))
+        module = "ansible.netcommon.netconf_config"
 
-        if xml_schema:
-            if "defaults" in xml_schema:
-                defaults = xml_schema["defaults"]
-            if "path" in xml_schema:
-                schema_out_path = xml_schema["path"]
-            if "annotations" in xml_schema:
-                annotations = xml_schema["annotations"]
-        result["xml_schema"] = genspec_obj.generate_xml_schema(
-            schema_out_path=schema_out_path,
-            defaults=defaults,
-            annotations=annotations,
-        )
-        schema_out_path = None
-        if tree_schema and "path" in tree_schema:
-            schema_out_path = tree_schema["path"]
-        result["tree_schema"] = genspec_obj.generate_tree_schema(
-            schema_out_path=schema_out_path
-        )
+        if not self._shared_loader_obj.module_loader.has_plugin(module):
+            result.update(
+                {"failed": True, "msg": "Could not find %s module." % module}
+            )
+        else:
+            new_module_args = self._task.args.copy()
+            new_module_args["content"] = xml_data
+            for item in ["file", "search_path", "config"]:
+                new_module_args.pop(item, None)
 
+            self._display.vvvv(
+                "Running %s module to fetch data from remote host" % module
+            )
+            result.update(
+                self._execute_module(
+                    module_name=module,
+                    module_args=new_module_args,
+                    task_vars=task_vars,
+                    wrap_async=self._task.async_val,
+                )
+            )
+        result.pop("server_capabilities", None)
         return result
