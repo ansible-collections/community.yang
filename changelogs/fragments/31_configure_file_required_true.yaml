@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - file attribute set as mandatory to validate the input json config.
