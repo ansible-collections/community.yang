@@ -39,6 +39,6 @@ def find_share_path(filename):
     ]
     for dirname in paths:
         env_path = os.sep.join(dirname.split(os.sep)[:-1])
-        share_path = os.path.join(env_path, 'share')
+        share_path = os.path.join(env_path, "share")
         if os.path.isfile(os.path.join(share_path, filename)):
             return share_path
