@@ -25,7 +25,7 @@ from ansible.errors import AnsibleError
 from ansible.utils.display import Display
 
 from ansible_collections.community.yang.plugins.module_utils.common import (
-    find_file_in_path,
+    find_file_in_path, find_share_path
 )
 
 display = Display()
@@ -366,7 +366,12 @@ class Translator(object):
             % (json_file_path, " ".join(sys.argv))
         )
         time.sleep(5)
+        jsonxsl_relative_dirpath = os.path.join("yang", "xslt")
+        jsonxsl_dir_path = find_share_path(os.path.join(jsonxsl_relative_dirpath, "jsonxsl-templates.xsl"))
+        if jsonxsl_dir_path is None:
+            raise AnsibleError("Could not find jsonxsl-templates.xsl in environment path")
         try:
+            os.putenv("PYANG_XSLT_DIR", os.path.join(jsonxsl_dir_path, jsonxsl_relative_dirpath))
             os.system(" ".join(sys.argv))
         except SystemExit:
             pass
