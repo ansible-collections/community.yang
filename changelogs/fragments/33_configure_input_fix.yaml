@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - This checks for the loaded json config and converts to json string if input is dict.

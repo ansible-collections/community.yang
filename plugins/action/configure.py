@@ -118,6 +118,9 @@ class ActionModule(ActionBase):
         result = super(ActionModule, self).run(tmp, task_vars)
 
         json_config = json.loads(self._task.args.get("config") or {})
+        if isinstance(json_config, dict):
+            json_config = json.dumps(json_config)
+
         yang_file = self._task.args.get("file") or None
         search_path = self._task.args.get("search_path") or None
         if not (
