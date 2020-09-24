@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - Fixed issue when pyang is installed in a venv, can't find `jsonxsl-templates.xsl`
+    file path (https://github.com/ansible-collections/community.yang/issues/25)
