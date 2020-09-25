@@ -30,3 +30,15 @@ def find_file_in_path(filename):
         fullpath = os.path.join(dirname, filename)
         if os.path.isfile(fullpath):
             return fullpath
+
+
+def find_share_path(filename):
+    # Check $PATH first, followed by same directory as sys.argv[0]
+    paths = os.environ["PATH"].split(os.pathsep) + [
+        os.path.dirname(sys.argv[0])
+    ]
+    for dirname in paths:
+        env_path = os.sep.join(dirname.split(os.sep)[:-1])
+        share_path = os.path.join(env_path, "share")
+        if os.path.isfile(os.path.join(share_path, filename)):
+            return share_path
