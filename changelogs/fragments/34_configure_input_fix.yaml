@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - input config type is dict now and json config can provided when translator object invoked.

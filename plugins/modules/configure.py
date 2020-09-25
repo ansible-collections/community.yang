@@ -22,7 +22,7 @@ options:
   config:
     description:
       - The running-configuration to be pushed onto the device in JSON format (as per RFC 7951).
-    type: str
+    type: dict
     required: True
   get_filter:
     description:
@@ -59,7 +59,7 @@ diff:
 EXAMPLES = """
 - name: configure interface using structured data in JSON format
   community.yang.configure:
-    config: |
+    config:
         {
             "openconfig-interfaces:interfaces":
              {
@@ -88,4 +88,10 @@ EXAMPLES = """
         </interface-configuration></interface-configurations>
     file: "{{ playbook_dir }}/public/release/models/interfaces/openconfig-interfaces.yang"
     search_path: "{{ playbook_dir }}/public/release/models"
+
+- name: Configure native data to running-config
+  community.yang.configure:
+    config: "{{ candidate['json_data'] }}"
+    file: "{{ yang_file }}"
+    search_path: "{{ search_path }}"
 """

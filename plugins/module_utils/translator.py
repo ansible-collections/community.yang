@@ -18,6 +18,7 @@ import uuid
 
 from copy import deepcopy
 
+from ansible.module_utils.basic import missing_required_lib
 from ansible.module_utils._text import to_text
 from ansible.module_utils.six import StringIO
 from ansible.utils.path import unfrackpath, makedirs_safe
@@ -28,18 +29,23 @@ from ansible_collections.community.yang.plugins.module_utils.common import (
     find_file_in_path,
     find_share_path,
 )
+from ansible.errors import AnsibleActionFail
 
 display = Display()
 
 try:
     import pyang  # noqa
+
+    HAS_PYANG = True
 except ImportError:
-    raise AnsibleError("pyang is not installed")
+    HAS_PYANG = False
 
 try:
     from lxml import etree
+
+    HAS_LXML = True
 except ImportError:
-    raise AnsibleError("lxml is not installed")
+    HAS_LXML = False
 
 JSON2XML_DIR_PATH = "~/.ansible/tmp/yang/json2xml"
 XM2JSONL_DIR_PATH = "~/.ansible/tmp/xml2json"
@@ -61,6 +67,7 @@ class Translator(object):
 
     def _handle_yang_file_path(self, yang_file):
         yang_file = os.path.realpath(os.path.expanduser(yang_file))
+
         if not os.path.isfile(yang_file):
             # Maybe we are passing a glob?
             self._yang_files = glob.glob(yang_file)
@@ -87,6 +94,10 @@ class Translator(object):
         self._search_path = abs_search_path
 
     def _set_pyang_executables(self):
+        if not HAS_PYANG:
+            raise AnsibleError(missing_required_lib("pyang"))
+        if not HAS_LXML:
+            raise AnsibleError(missing_required_lib("lxml"))
         base_pyang_path = sys.modules["pyang"].__file__
         self._pyang_exec_path = find_file_in_path("pyang")
         self._pyang_exec = imp.load_source("pyang", self._pyang_exec_path)
@@ -99,6 +110,7 @@ class Translator(object):
         :param json_data: JSON data that should to translated to XML
         :return: XML data in string format.
         """
+
         saved_arg = deepcopy(sys.argv)
         saved_stdout = sys.stdout
         saved_stderr = sys.stderr

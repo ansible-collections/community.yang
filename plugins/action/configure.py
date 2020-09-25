@@ -72,7 +72,7 @@ class ActionModule(ActionBase):
         that cannot be covered using stnd techniques
         """
         errors = []
-        config = self._task.args.get("config") or None
+        config = json.dumps(self._task.args.get("config"))
         try:
             # validate json
             json.loads(config)
@@ -117,7 +117,8 @@ class ActionModule(ActionBase):
             return self._result
         result = super(ActionModule, self).run(tmp, task_vars)
 
-        json_config = json.loads(self._task.args.get("config") or {})
+        json_config = self._task.args.get("config")
+
         yang_file = self._task.args.get("file") or None
         search_path = self._task.args.get("search_path") or None
         if not (
