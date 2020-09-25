@@ -108,8 +108,8 @@ class Translator(object):
         makedirs_safe(plugindir)
         makedirs_safe(os.path.join(plugindir, plugin_instance))
 
-        if not os.path.isfile(json_data):
-            # input is xml string, copy it to file in temporary location
+        if isinstance(json_data, dict):
+            # input is in json format, copy it to file in temporary location
             json_file_path = os.path.join(
                 JSON2XML_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "json")
             )
@@ -118,10 +118,16 @@ class Translator(object):
             )
             with open(json_file_path, "w") as f:
                 f.write(json_data)
-            json_data = os.path.realpath(os.path.expanduser(json_file_path))
+            json_file_path = os.path.realpath(os.path.expanduser(json_file_path))
+
+        elif os.path.isfile(json_data):
+            json_file_path = json_data
+        else:
+            raise AnsibleError("unable to create/find temporary json file %s" % json_data)
+
         try:
             # validate json
-            with open(json_data) as fp:
+            with open(json_file_path) as fp:
                 json.load(fp)
         except Exception as exc:
             raise AnsibleError(
@@ -200,7 +206,7 @@ class Translator(object):
             "-o",
             xml_file_path,
             jtox_file_path,
-            json_data,
+            json_file_path,
         ]
 
         try:
@@ -248,10 +254,8 @@ class Translator(object):
         plugindir = unfrackpath(XM2JSONL_DIR_PATH)
         makedirs_safe(plugindir)
 
-        if os.path.isfile(xml_data):
-            # input is xml file path
-            xml_file_path = os.path.realpath(os.path.expanduser(xml_data))
-        else:
+        try:
+            etree.fromstring(xml_data)
             # input is xml string, copy it to file in temporary location
             xml_file_path = os.path.join(
                 XM2JSONL_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "xml")
@@ -264,25 +268,37 @@ class Translator(object):
                     )
                 data = xml_data
                 f.write(data)
+        except etree.XMLSyntaxError:
+            if os.path.isfile(xml_data):
+                # input is xml file path
+                xml_file_path = os.path.realpath(os.path.expanduser(xml_data))
+            else:
+                if not self._keep_tmp_files:
+                    shutil.rmtree(
+                        os.path.realpath(os.path.expanduser(XM2JSONL_DIR_PATH)),
+                        ignore_errors=True,
+                    )
+                raise AnsibleError("Unable to create file or read XML data %s" % xml_data)
 
         xml_file_path = os.path.realpath(os.path.expanduser(xml_file_path))
 
-        try:
-            # validate xml
-            etree.parse(xml_file_path)
-            display.vvvv(
-                "Parsing xml data from temporary file: %s" % xml_file_path
-            )
-        except Exception as exc:
-            if not self._keep_tmp_files:
-                shutil.rmtree(
-                    os.path.realpath(os.path.expanduser(XM2JSONL_DIR_PATH)),
-                    ignore_errors=True,
+        if os.path.isfile(xml_data):
+            try:
+                # validate xml
+                etree.parse(xml_file_path)
+                display.vvvv(
+                    "Parsing xml data from temporary file: %s" % xml_file_path
                 )
-            raise AnsibleError(
-                "Failed to load xml data: %s"
-                % (to_text(exc, errors="surrogate_or_strict"))
-            )
+            except Exception as exc:
+                if not self._keep_tmp_files:
+                    shutil.rmtree(
+                        os.path.realpath(os.path.expanduser(XM2JSONL_DIR_PATH)),
+                        ignore_errors=True,
+                    )
+                raise AnsibleError(
+                    "Failed to load xml data: %s"
+                    % (to_text(exc, errors="surrogate_or_strict"))
+                )
 
         base_pyang_path = sys.modules["pyang"].__file__
         pyang_exec_path = find_file_in_path("pyang")
