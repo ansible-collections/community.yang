@@ -29,7 +29,6 @@ from ansible_collections.community.yang.plugins.module_utils.common import (
     find_file_in_path,
     find_share_path,
 )
-from ansible.errors import AnsibleActionFail
 
 display = Display()
 
@@ -67,7 +66,6 @@ class Translator(object):
 
     def _handle_yang_file_path(self, yang_file):
         yang_file = os.path.realpath(os.path.expanduser(yang_file))
-
         if not os.path.isfile(yang_file):
             # Maybe we are passing a glob?
             self._yang_files = glob.glob(yang_file)
@@ -110,7 +108,6 @@ class Translator(object):
         :param json_data: JSON data that should to translated to XML
         :return: XML data in string format.
         """
-
         saved_arg = deepcopy(sys.argv)
         saved_stdout = sys.stdout
         saved_stderr = sys.stderr
