@@ -118,12 +118,16 @@ class Translator(object):
             )
             with open(json_file_path, "w") as f:
                 f.write(json.dumps(json_data))
-            json_file_path = os.path.realpath(os.path.expanduser(json_file_path))
+            json_file_path = os.path.realpath(
+                os.path.expanduser(json_file_path)
+            )
 
         elif os.path.isfile(json_data):
             json_file_path = json_data
         else:
-            raise AnsibleError("unable to create/find temporary json file %s" % json_data)
+            raise AnsibleError(
+                "unable to create/find temporary json file %s" % json_data
+            )
 
         try:
             # validate json
@@ -275,10 +279,14 @@ class Translator(object):
             else:
                 if not self._keep_tmp_files:
                     shutil.rmtree(
-                        os.path.realpath(os.path.expanduser(XM2JSONL_DIR_PATH)),
+                        os.path.realpath(
+                            os.path.expanduser(XM2JSONL_DIR_PATH)
+                        ),
                         ignore_errors=True,
                     )
-                raise AnsibleError("Unable to create file or read XML data %s" % xml_data)
+                raise AnsibleError(
+                    "Unable to create file or read XML data %s" % xml_data
+                )
 
         xml_file_path = os.path.realpath(os.path.expanduser(xml_file_path))
 
@@ -292,7 +300,9 @@ class Translator(object):
             except Exception as exc:
                 if not self._keep_tmp_files:
                     shutil.rmtree(
-                        os.path.realpath(os.path.expanduser(XM2JSONL_DIR_PATH)),
+                        os.path.realpath(
+                            os.path.expanduser(XM2JSONL_DIR_PATH)
+                        ),
                         ignore_errors=True,
                     )
                 raise AnsibleError(
