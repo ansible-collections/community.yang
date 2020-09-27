@@ -117,7 +117,7 @@ class Translator(object):
                 os.path.expanduser(json_file_path)
             )
             with open(json_file_path, "w") as f:
-                f.write(json_data)
+                f.write(json.dumps(json_data))
             json_file_path = os.path.realpath(os.path.expanduser(json_file_path))
 
         elif os.path.isfile(json_data):
