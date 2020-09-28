@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - fetch module docstring updated with supported_yang_modules attribute.

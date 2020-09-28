@@ -49,6 +49,11 @@ fetched:
   returned: always apart from low-level errors (such as action plugin)
   type: dict
   sample: {"ietf-inet-types": "module ietf-inet-types ...<--snip-->"}
+supported_yang_modules:
+  description: List of supported yang models name
+  returned: only when model name is not provided
+  type: list
+  sample: ["ietf-netconf-monitoring", "cisco-xr-ietf-netconf-monitoring-deviations"]
 """
 EXAMPLES = """
 - name: Fetch given yang model from remote host
