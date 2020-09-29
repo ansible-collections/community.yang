@@ -31,6 +31,7 @@ from ansible_collections.community.yang.plugins.modules.fetch import (
 
 
 ARGSPEC_CONDITIONALS = {"mutually_exclusive": [["name", "all"]]}
+VALID_CONNECTION_TYPES = ["ansible.netcommon.netconf"]
 
 
 def generate_argspec():
@@ -67,6 +68,16 @@ class ActionModule(ActionBase):
         basic.AnsibleModule(**argspec)
 
     def run(self, tmp=None, task_vars=None):
+        if self._play_context.connection.split(".")[-1] != "netconf":
+            return {
+                "failed": True,
+                "msg": "Connection type %s is not valid for this module. Valid connection type is one of '%s'."
+                % (
+                    self._play_context.connection,
+                    ", ".join(VALID_CONNECTION_TYPES),
+                ),
+            }
+
         self._check_argspec()
         if self._result.get("failed"):
             return self._result
@@ -81,6 +92,14 @@ class ActionModule(ActionBase):
         socket_path = self._connection.socket_path
         conn = Connection(socket_path)
 
+        capabilities = json.loads(conn.get_capabilities())
+        server_capabilities = capabilities.get("server_capabilities", [])
+
+        if "netconf-monitoring" not in "\n".join(server_capabilities):
+            raise AnsibleActionFail(
+                "remote netconf server does not support required capability"
+                " to fetch yang schema (urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring)."
+            )
         ss = SchemaStore(conn)
 
         result["fetched"] = dict()
@@ -108,6 +127,7 @@ class ActionModule(ActionBase):
             result["number_schema_fetched"] = total_count
             result["changed"] = True
         else:
+            supported_yang_modules.sort()
             result["supported_yang_modules"] = supported_yang_modules
             result["changed"] = False
             result["number_schema_fetched"] = 0
