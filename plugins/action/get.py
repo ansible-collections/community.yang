@@ -9,7 +9,6 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 import json
-import glob
 import os
 
 from ansible.plugins.action import ActionBase
@@ -61,15 +60,6 @@ class ActionModule(ActionBase):
         that cannot be covered using stnd techniques
         """
         errors = []
-        yang_file = self._task.args.get("file")
-        if yang_file:
-            yang_file = os.path.realpath(os.path.expanduser(yang_file))
-            if not os.path.isfile(yang_file):
-                # Maybe we are passing a glob?
-                _yang_files = glob.glob(yang_file)
-                if not _yang_files:
-                    msg = "%s invalid yang_file path" % yang_file
-                    errors.append(msg)
 
         if "search_path" in self._task.args:
             search_path = self._task.args["search_path"]
@@ -89,7 +79,7 @@ class ActionModule(ActionBase):
             return self._result
         result = super(ActionModule, self).run(tmp, task_vars)
 
-        yang_file = self._task.args.get("file")
+        yang_files = self._task.args.get("file", [])
         search_path = self._task.args.get("search_path")
 
         if not (
@@ -127,7 +117,7 @@ class ActionModule(ActionBase):
             return result
 
         # convert XML data to JSON data as per RFC 7951 format
-        tl = Translator(yang_file, search_path=search_path)
+        tl = Translator(yang_files, search_path=search_path)
         result["json_data"] = tl.xml_to_json(result["stdout"])
         result["xml_data"] = result["stdout"]
         result.pop("stdout", None)

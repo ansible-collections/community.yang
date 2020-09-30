@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - Update file option to list with elements as path (https://github.com/ansible-collections/community.yang/issues/30)

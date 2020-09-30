@@ -37,7 +37,8 @@ options:
         This options accepts wildcard (*) as well for the filename in case the configuration requires
         to parse multiple yang file. For example "openconfig/public/tree/master/release/models/interfaces/*.yang"
     required: True
-    type: path
+    type: list
+    elements: path
   search_path:
     description:
       - is a colon C(:) separated list of directories to search for imported yang modules

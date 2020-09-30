@@ -28,6 +28,7 @@ from ansible.utils.display import Display
 from ansible_collections.community.yang.plugins.module_utils.common import (
     find_file_in_path,
     find_share_path,
+    to_list,
 )
 
 display = Display()
@@ -53,27 +54,33 @@ XM2JSONL_DIR_PATH = "~/.ansible/tmp/xml2json"
 class Translator(object):
     def __init__(
         self,
-        yang_file,
+        yang_files,
         search_path=None,
         doctype="config",
         keep_tmp_files=False,
     ):
+        yang_files = to_list(yang_files) if yang_files else []
+        self._yang_files = []
         self._doctype = doctype
         self._keep_tmp_files = keep_tmp_files
-        self._handle_yang_file_path(yang_file)
+        self._handle_yang_file_path(yang_files)
         self._handle_search_path(search_path)
         self._set_pyang_executables()
 
-    def _handle_yang_file_path(self, yang_file):
-        yang_file = os.path.realpath(os.path.expanduser(yang_file))
-        if not os.path.isfile(yang_file):
-            # Maybe we are passing a glob?
-            self._yang_files = glob.glob(yang_file)
-            if not self._yang_files:
-                # Glob returned no files
-                raise AnsibleError("%s invalid file path" % yang_file)
-        else:
-            self._yang_files = [yang_file]
+    def _handle_yang_file_path(self, yang_files):
+        for yang_file in yang_files:
+            yang_file = os.path.realpath(os.path.expanduser(yang_file))
+            if not os.path.isfile(yang_file):
+                # Maybe we are passing a glob?
+                _yang_files = glob.glob(yang_file)
+                if not _yang_files:
+                    # Glob returned no files
+                    raise AnsibleError("%s invalid file path" % yang_file)
+                self._yang_files.extend(_yang_files)
+            else:
+                self._yang_files.extend(yang_file)
+        # ensure file path entry is unique
+        self._yang_files = list(set(self._yang_files))
 
     def _handle_search_path(self, search_path):
         if search_path is None:

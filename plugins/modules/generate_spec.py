@@ -27,7 +27,8 @@ options:
     description:
       - The file path of the top level YANG model for the spec should be generated.
         This option is mutually-exclusive with C(content) option.
-    type: str
+    type: list
+    elements: path
   search_path:
     description:
       - is a colon C(:) separated list of directories to search for imported yang modules
