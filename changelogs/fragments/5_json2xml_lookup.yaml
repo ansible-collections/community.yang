@@ -1,3 +1,0 @@
----
-major_changes:
-  - Added json2xml lookup plugin (https://github.com/ansible-collections/community.yang/pull/5)

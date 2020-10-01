@@ -1,3 +1,0 @@
----
-major_changes:
-  - Added module to fetch yang model and it's dependenices from remote host (https://github.com/ansible-collections/community.yang/issues/1).

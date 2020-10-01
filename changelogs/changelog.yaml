@@ -1,0 +1,46 @@
+ancestor: null
+releases:
+  1.0.0:
+    changes:
+      bugfixes:
+      - Fixed issue when pyang is installed in a venv, can't find `jsonxsl-templates.xsl`
+        file path (https://github.com/ansible-collections/community.yang/issues/25)
+      - Fixed jxmlease is required for fetch, but not listed in docs. Use xmltodict
+        instead of jxmlease (https://github.com/ansible-collections/community.yang/issues/18)
+      - Fixed traceback in fetch when the ansible_connection is set to ansible.netcommon.network_cli
+        (https://github.com/ansible-collections/community.yang/issues/18)
+      - Fixed traceback when using fetch with nxos (https://github.com/ansible-collections/community.yang/issues/20)
+      - Update file option to list with elements as path (https://github.com/ansible-collections/community.yang/issues/30)
+      - fetch module docstring updated with supported_yang_modules attribute.
+      - file attribute set as mandatory to validate the input json config.
+      - input config type is dict now and json config can provided when translator
+        object invoked.
+      major_changes:
+      - Added configure module to push json format configuration on to remote host
+        over netconf connection.
+      - Added generate_spec module (https://github.com/ansible-collections/community.yang/pull/6)
+      - Added get module (https://github.com/ansible-collections/community.yang/pull/8)
+      - Added json2xml lookup plugin (https://github.com/ansible-collections/community.yang/pull/5)
+      - Added module to fetch yang model and it's dependenices from remote host (https://github.com/ansible-collections/community.yang/issues/1).
+      - Added spec lookup plugin (https://github.com/ansible-collections/community.yang/pull/4)
+      - Added xml2json lookup plugin (https://github.com/ansible-collections/community.yang/pull/7)
+      minor_changes:
+      - Added support to sort supported yang models returned with fetch (https://github.com/ansible-collections/community.yang/issues/21).
+    fragments:
+    - 18-requirement_list_fix.yaml
+    - 19-connection_type_chec.yaml
+    - 1_yang_fetch.yaml
+    - 20-fix_yang_schema_monitoring_capability.yaml
+    - 21-sort_supported_yang_module_list.yaml
+    - 25_jsonxsl_file_path.yaml
+    - 30_yang_file_list.yaml
+    - 31_configure_file_required_true.yaml
+    - 32_fetch_doc_update.yaml
+    - 34_configure_input_fix.yaml
+    - 4_spec_lookup.yaml
+    - 5_json2xml_lookup.yaml
+    - 6_generate_spec.yaml
+    - 7_xml2json_lookup.yaml
+    - 8_get.yaml
+    - yang_configure_module.yaml
+    release_date: '2020-10-01'
