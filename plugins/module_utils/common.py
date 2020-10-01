@@ -13,7 +13,7 @@ from collections import Sequence
 
 
 def to_list(val):
-    if isinstance(val, Sequence):
+    if isinstance(val, (list, tuple, set)):
         return list(val)
     elif val is not None:
         return [val]
