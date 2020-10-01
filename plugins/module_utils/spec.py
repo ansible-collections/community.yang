@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+import glob
 import os
 import sys
 import shutil
@@ -23,6 +24,7 @@ from ansible.utils.display import Display
 
 from ansible_collections.community.yang.plugins.module_utils.common import (
     find_file_in_path,
+    to_list,
 )
 
 display = Display()
@@ -44,7 +46,8 @@ class GenerateSpec(object):
         doctype="config",
         keep_tmp_files=False,
     ):
-        self._yang_file_path = yang_file_path
+        yang_file_path = to_list(yang_file_path) if yang_file_path else []
+        self._yang_file_path = []
         self._yang_content = yang_content
         self._doctype = doctype
         self._keep_tmp_files = keep_tmp_files
@@ -53,13 +56,16 @@ class GenerateSpec(object):
         self._plugindir = unfrackpath(YANG_SPEC_DIR_PATH)
         makedirs_safe(self._plugindir)
 
-        if search_path is None:
-            if yang_file_path:
-                search_path = os.path.dirname(yang_file_path)
-            else:
-                search_path = YANG_SPEC_DIR_PATH
+        self._handle_yang_file_path(yang_file_path)
+        self._handle_search_path(search_path)
 
-        if yang_file_path is None:
+    def __del__(self):
+        if not self._keep_tmp_files:
+            shutil.rmtree(self._plugindir, ignore_errors=True)
+        super(GenerateSpec, self).__del__()
+
+    def _handle_yang_file_path(self, yang_files):
+        if not yang_files:
             content_tmp_file_path = os.path.join(
                 YANG_SPEC_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "yang")
             )
@@ -67,15 +73,38 @@ class GenerateSpec(object):
                 os.path.expanduser(content_tmp_file_path)
             )
             with open(content_tmp_file_path, "w") as opened_file:
-                opened_file.write(yang_content)
-            self._yang_file_path = content_tmp_file_path
+                opened_file.write(self._yang_content)
+            self._yang_file_path.append(content_tmp_file_path)
+        else:
+            for yang_file in yang_files:
+                yang_file = os.path.realpath(os.path.expanduser(yang_file))
+                if not os.path.isfile(yang_file):
+                    # Maybe we are passing a glob?
+                    _yang_files = glob.glob(yang_file)
+                    if not _yang_files:
+                        # Glob returned no files
+                        raise AnsibleError("%s invalid file path" % yang_file)
+                    self._yang_file_path.extend(_yang_files)
+                else:
+                    self._yang_file_path.append(yang_file)
+        # ensure file path entry is unique
+        self._yang_file_path = list(set(self._yang_file_path))
 
-        self._search_path = search_path
+    def _handle_search_path(self, search_path):
+        if search_path is None:
+            search_path = os.path.dirname(self._yang_file_path[0])
 
-    def __del__(self):
-        if not self._keep_tmp_files:
-            shutil.rmtree(self._plugindir, ignore_errors=True)
-        super(GenerateSpec, self).__del__()
+        abs_search_path = None
+        for path in search_path.split(":"):
+            path = os.path.realpath(os.path.expanduser(path))
+            if abs_search_path is None:
+                abs_search_path = path
+            else:
+                abs_search_path += ":" + path
+            if path != "" and not os.path.isdir(path):
+                raise AnsibleError("%s is invalid directory path" % path)
+
+        self._search_path = abs_search_path
 
     def generate_tree_schema(self, schema_out_path=None):
         """
@@ -105,11 +134,10 @@ class GenerateSpec(object):
             "tree",
             "-o",
             tree_tmp_file_path,
-            self._yang_file_path,
             "-p",
             self._search_path,
             "--lax-quote-checks",
-        ]
+        ] + self._yang_file_path
 
         try:
             subprocess.check_output(
@@ -193,13 +221,12 @@ class GenerateSpec(object):
             "sample-xml-skeleton",
             "-o",
             xml_tmp_file_path,
-            self._yang_file_path,
             "-p",
             self._search_path,
             "--sample-xml-skeleton-doctype",
             self._doctype,
             "--lax-quote-checks",
-        ]
+        ] + self._yang_file_path
 
         if defaults:
             sample_xml_skeleton_cmd.append("--sample-xml-skeleton-defaults")
@@ -296,13 +323,12 @@ class GenerateSpec(object):
             "sample-json-skeleton",
             "-o",
             json_tmp_file_path,
-            self._yang_file_path,
             "-p",
             self._search_path,
             "--lax-quote-checks",
             "--sample-json-skeleton-doctype",
             self._doctype,
-        ]
+        ] + self._yang_file_path
 
         if defaults:
             sample_json_skeleton_cmd.append("--sample-json-skeleton-defaults")

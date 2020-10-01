@@ -8,7 +8,6 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-import glob
 import json
 from ansible.plugins.action import ActionBase
 import os
@@ -84,16 +83,6 @@ class ActionModule(ActionBase):
             )
             errors.append(msg)
 
-        yang_file = self._task.args.get("file") or None
-        if yang_file:
-            yang_file = os.path.realpath(os.path.expanduser(yang_file))
-            if not os.path.isfile(yang_file):
-                # Maybe we are passing a glob?
-                _yang_files = glob.glob(yang_file)
-                if not _yang_files:
-                    msg = "%s invalid yang_file path" % yang_file
-                    errors.append(msg)
-
         if "search_path" in self._task.args:
             search_path = self._task.args["search_path"]
             for path in search_path.split(":"):
@@ -130,7 +119,7 @@ class ActionModule(ActionBase):
 
         json_config = self._task.args.get("config")
 
-        yang_file = self._task.args.get("file") or None
+        yang_files = self._task.args.get("file", [])
         search_path = self._task.args.get("search_path") or None
         if not (
             hasattr(self._connection, "socket_path")
@@ -139,7 +128,7 @@ class ActionModule(ActionBase):
             raise AnsibleConnectionError(
                 "netconf connection to remote host in not active"
             )
-        tl = Translator(yang_file, search_path)
+        tl = Translator(yang_files, search_path)
         xml_data = tl.json_to_xml(json_config)
 
         parser = XMLParser(ns_clean=True, recover=True, encoding="utf-8")

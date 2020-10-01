@@ -71,10 +71,6 @@ class ActionModule(ActionBase):
         that cannot be covered using stnd techniques
         """
         errors = []
-        yang_file = self._task.args.get("file") or None
-        if yang_file and not os.path.isfile(yang_file):
-            msg = "%s invalid file path" % yang_file
-            errors.append(msg)
 
         if "search_path" in self._task.args:
             search_path = self._task.args["search_path"]
@@ -110,7 +106,7 @@ class ActionModule(ActionBase):
             return self._result
         result = super(ActionModule, self).run(tmp, task_vars)
 
-        yang_file = self._task.args.get("file") or None
+        yang_files = self._task.args.get("file", [])
         yang_content = self._task.args.get("content") or None
         search_path = self._task.args.get("search_path") or None
         doctype = self._task.args.get("doctype") or "config"
@@ -120,7 +116,7 @@ class ActionModule(ActionBase):
 
         genspec_obj = GenerateSpec(
             yang_content=yang_content,
-            yang_file_path=yang_file,
+            yang_file_path=yang_files,
             search_path=search_path,
             doctype=doctype,
         )
