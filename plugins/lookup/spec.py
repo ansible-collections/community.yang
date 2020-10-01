@@ -56,8 +56,6 @@ DOCUMENTATION = """
             option is mainly used for debugging purpose.
         default: False
         type: bool
-requirements:
-- pyang
 """
 
 EXAMPLES = """
