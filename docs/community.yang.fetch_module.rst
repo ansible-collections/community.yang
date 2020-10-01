@@ -26,6 +26,7 @@ The below requirements are needed on the host that executes this module.
 
 - ncclient (>=v0.5.2)
 - pyang
+- xmltodict
 
 
 Parameters
@@ -78,7 +79,7 @@ Notes
 
 .. note::
    - This module requires the NETCONF system service be enabled on the remote device being managed.
-   - This module supports the use of connection=netconf
+   - This module supports the use of connection=ansible.netcommon.netconf
    - If no options provided it will return list of yang model name supported by remote host
 
 

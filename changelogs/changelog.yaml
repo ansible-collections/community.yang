@@ -10,6 +10,7 @@ releases:
       - Fixed traceback in fetch when the ansible_connection is set to ansible.netcommon.network_cli
         (https://github.com/ansible-collections/community.yang/issues/18)
       - Fixed traceback when using fetch with nxos (https://github.com/ansible-collections/community.yang/issues/20)
+      - Update file option to list with elements as path (https://github.com/ansible-collections/community.yang/issues/30)
       - fetch module docstring updated with supported_yang_modules attribute.
       - file attribute set as mandatory to validate the input json config.
       - input config type is dict now and json config can provided when translator
@@ -32,6 +33,7 @@ releases:
     - 20-fix_yang_schema_monitoring_capability.yaml
     - 21-sort_supported_yang_module_list.yaml
     - 25_jsonxsl_file_path.yaml
+    - 30_yang_file_list.yaml
     - 31_configure_file_required_true.yaml
     - 32_fetch_doc_update.yaml
     - 34_configure_input_fix.yaml

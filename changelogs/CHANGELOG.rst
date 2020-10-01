@@ -31,6 +31,7 @@ Bugfixes
 - Fixed jxmlease is required for fetch, but not listed in docs. Use xmltodict instead of jxmlease (https://github.com/ansible-collections/community.yang/issues/18)
 - Fixed traceback in fetch when the ansible_connection is set to ansible.netcommon.network_cli (https://github.com/ansible-collections/community.yang/issues/18)
 - Fixed traceback when using fetch with nxos (https://github.com/ansible-collections/community.yang/issues/20)
+- Update file option to list with elements as path (https://github.com/ansible-collections/community.yang/issues/30)
 - fetch module docstring updated with supported_yang_modules attribute.
 - file attribute set as mandatory to validate the input json config.
 - input config type is dict now and json config can provided when translator object invoked.

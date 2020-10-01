@@ -79,7 +79,8 @@ Parameters
                     <b>file</b>
                     <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
                     <div style="font-size: small">
-                        <span style="color: purple">string</span>
+                        <span style="color: purple">list</span>
+                         / <span style="color: purple">elements=path</span>
                     </div>
                 </td>
                 <td>
@@ -269,7 +270,7 @@ Notes
 
 .. note::
    - This module requires the NETCONF system service be enabled on the remote device being managed.
-   - This module supports the use of connection=netconf
+   - This module supports the use of connection=ansible.netcommon.netconf
 
 
 

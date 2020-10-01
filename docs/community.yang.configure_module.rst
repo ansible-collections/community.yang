@@ -22,6 +22,13 @@ Synopsis
 
 
 
+Requirements
+------------
+The below requirements are needed on the host that executes this module.
+
+- ncclient (>=v0.5.2)
+- pyang
+
 
 Parameters
 ----------
@@ -56,7 +63,8 @@ Parameters
                     <b>file</b>
                     <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
                     <div style="font-size: small">
-                        <span style="color: purple">path</span>
+                        <span style="color: purple">list</span>
+                         / <span style="color: purple">elements=path</span>
                          / <span style="color: red">required</span>
                     </div>
                 </td>
@@ -100,6 +108,13 @@ Parameters
     </table>
     <br/>
 
+
+Notes
+-----
+
+.. note::
+   - This module requires the NETCONF system service be enabled on the remote device being managed.
+   - This module supports the use of connection=ansible.netcommon.netconf
 
 
 
