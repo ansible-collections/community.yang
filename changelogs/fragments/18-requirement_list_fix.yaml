@@ -1,5 +1,0 @@
----
-bugfixes:
-  - Fixed jxmlease is required for fetch, but not listed in docs.
-    Use xmltodict instead of jxmlease
-    (https://github.com/ansible-collections/community.yang/issues/18)

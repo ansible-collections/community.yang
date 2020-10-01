@@ -1,4 +1,0 @@
----
-minor_changes:
-  - Added support to sort supported yang models returned with fetch
-    (https://github.com/ansible-collections/community.yang/issues/21).

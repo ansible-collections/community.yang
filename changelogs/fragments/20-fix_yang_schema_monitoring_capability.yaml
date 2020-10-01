@@ -1,4 +1,0 @@
----
-bugfixes:
-  - Fixed traceback when using fetch with nxos
-    (https://github.com/ansible-collections/community.yang/issues/20)

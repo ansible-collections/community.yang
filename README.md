@@ -4,6 +4,37 @@ This repo hosts the `community.yang` Ansible Collection.
 
 The collection includes the community plugins to help the support Yang manily with network devices.
 
+<!--start requires_ansible-->
+## Ansible version compatibility
+
+This collection has been tested against following Ansible versions: **>=2.9.10,<2.11**.
+
+Plugins and modules within a collection may be tested with only specific Ansible versions.
+A collection may contain metadata that identifies these versions.
+PEP440 is the schema used to describe the versions of Ansible.
+<!--end requires_ansible-->
+
+### Supported connections
+The Community yang collection supports ``netconf`` connections.
+
+## Included content
+<!--start collection content-->
+### Lookup plugins
+Name | Description
+--- | ---
+[community.yang.json2xml](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.json2xml_lookup.rst)|Validates json configuration against yang data model and convert it to xml.
+[community.yang.spec](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.spec_lookup.rst)|This plugin reads the content of given yang document and generates json and xml configuration skeleton and a tree structure of yang document.
+[community.yang.xml2json](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.xml2json_lookup.rst)|Converts xml input to json structure output by mapping it against corresponding Yang model
+
+### Modules
+Name | Description
+--- | ---
+[community.yang.configure](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.configure_module.rst)|Reads the input configuration in JSON format and pushes to the remote host over netconf
+[community.yang.fetch](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.fetch_module.rst)|Fetch given yang model and it's dependencies
+[community.yang.generate_spec](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.generate_spec_module.rst)|Generate JSON/XML schema and tree representation for given YANG model
+[community.yang.get](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.get_module.rst)|Fetch the device configuration and render it in JSON format defined by RFC7951
+
+<!--end collection content-->
 
 ## Installation and Usage
 
@@ -36,7 +67,7 @@ To run these network integration tests, use ansible-test network-integration --i
 
 ## Publishing New Version
 
-The current process for publishing new versions of the Cisco ASA Community Collection is manual, and requires a user who has access to the `community` namespace on Ansible Galaxy to publish the build artifact.
+The current process for publishing new versions of the Community Collection is manual, and requires a user who has access to the `community` namespace on Ansible Galaxy to publish the build artifact.
 
   1. Ensure `CHANGELOG.md` contains all the latest changes.
   2. Update `galaxy.yml` with the new `version` for the collection.

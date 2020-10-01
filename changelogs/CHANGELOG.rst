@@ -1,0 +1,36 @@
+==========================================
+Ansible Netcommon Collection Release Notes
+==========================================
+
+.. contents:: Topics
+
+
+v1.0.0
+======
+
+Major Changes
+-------------
+
+- Added configure module to push json format configuration on to remote host over netconf connection.
+- Added generate_spec module (https://github.com/ansible-collections/community.yang/pull/6)
+- Added get module (https://github.com/ansible-collections/community.yang/pull/8)
+- Added json2xml lookup plugin (https://github.com/ansible-collections/community.yang/pull/5)
+- Added module to fetch yang model and it's dependenices from remote host (https://github.com/ansible-collections/community.yang/issues/1).
+- Added spec lookup plugin (https://github.com/ansible-collections/community.yang/pull/4)
+- Added xml2json lookup plugin (https://github.com/ansible-collections/community.yang/pull/7)
+
+Minor Changes
+-------------
+
+- Added support to sort supported yang models returned with fetch (https://github.com/ansible-collections/community.yang/issues/21).
+
+Bugfixes
+--------
+
+- Fixed issue when pyang is installed in a venv, can't find `jsonxsl-templates.xsl` file path (https://github.com/ansible-collections/community.yang/issues/25)
+- Fixed jxmlease is required for fetch, but not listed in docs. Use xmltodict instead of jxmlease (https://github.com/ansible-collections/community.yang/issues/18)
+- Fixed traceback in fetch when the ansible_connection is set to ansible.netcommon.network_cli (https://github.com/ansible-collections/community.yang/issues/18)
+- Fixed traceback when using fetch with nxos (https://github.com/ansible-collections/community.yang/issues/20)
+- fetch module docstring updated with supported_yang_modules attribute.
+- file attribute set as mandatory to validate the input json config.
+- input config type is dict now and json config can provided when translator object invoked.
