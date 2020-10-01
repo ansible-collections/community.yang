@@ -86,7 +86,7 @@ requirements:
 notes:
 - This module requires the NETCONF system service be enabled on the remote device
   being managed.
-- This module supports the use of connection=netconf
+- This module supports the use of connection=ansible.netcommon.netconf
 """
 RETURN = """
 tree_schema:
