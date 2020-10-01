@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - Fixed traceback in fetch when the ansible_connection is set to ansible.netcommon.network_cli
+    (https://github.com/ansible-collections/community.yang/issues/18)

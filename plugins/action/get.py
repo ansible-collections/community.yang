@@ -30,6 +30,8 @@ from ansible_collections.community.yang.plugins.modules.get import (
     DOCUMENTATION,
 )
 
+VALID_CONNECTION_TYPES = ["ansible.netcommon.netconf"]
+
 
 class ActionModule(ActionBase):
     def __init__(self, *args, **kwargs):
@@ -83,6 +85,16 @@ class ActionModule(ActionBase):
             self._result["msg"] = " ".join(errors)
 
     def run(self, tmp=None, task_vars=None):
+        if self._play_context.connection.split(".")[-1] != "netconf":
+            return {
+                "failed": True,
+                "msg": "Connection type %s is not valid for this module. Valid connection type is one of '%s'."
+                % (
+                    self._play_context.connection,
+                    ", ".join(VALID_CONNECTION_TYPES),
+                ),
+            }
+
         self._check_argspec()
         self._extended_check_argspec()
         if self._result.get("failed"):

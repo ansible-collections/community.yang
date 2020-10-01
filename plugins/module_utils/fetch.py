@@ -16,14 +16,15 @@ else:
     import queue as queue
 
 from ansible.module_utils._text import to_text
+from ansible.module_utils.connection import ConnectionError
 from ansible.utils.display import Display
 
 try:
-    import jxmlease
+    import xmltodict
 
-    HAS_JXMLEASE = True
+    HAS_XMLTODICT = True
 except ImportError:
-    HAS_JXMLEASE = False
+    HAS_XMLTODICT = False
 
 display = Display()
 
@@ -36,11 +37,11 @@ class SchemaStore(object):
         self._all_schema_identifier_list = []
 
     def get_schema_description(self):
-        if not HAS_JXMLEASE:
+        if not HAS_XMLTODICT:
             raise ValueError(
-                "jxmlease is required to store response in json format "
+                "xmltodict is required to store response in json format "
                 "but does not appear to be installed. "
-                "It can be installed using `pip install jxmlease`"
+                "It can be installed using `pip install xmltodict`"
             )
 
         get_filter = """
@@ -55,7 +56,7 @@ class SchemaStore(object):
         except ConnectionError as e:
             raise ValueError(to_text(e))
 
-        res_json = jxmlease.parse(resp)
+        res_json = xmltodict.parse(resp, dict_constructor=dict)
         if "rpc-reply" in res_json:
             self._all_schema_list = res_json["rpc-reply"]["data"][
                 "netconf-state"
@@ -97,8 +98,8 @@ class SchemaStore(object):
                 response = self._conn.dispatch(xml_request)
             except ConnectionError as e:
                 raise ValueError(to_text(e))
-            res_json = jxmlease.parse(response)
-            data_model = res_json["rpc-reply"]["data"]
+            res_json = xmltodict.parse(response, dict_constructor=dict)
+            data_model = res_json["rpc-reply"]["data"]["#text"]
             display.vvv("Fetched '%s' yang model" % schema_id)
             result["fetched"][schema_id] = data_model
             self._schema_cache.append(schema_cache_entry)
@@ -116,7 +117,9 @@ class SchemaStore(object):
         if found:
             result["fetched"][schema_id] = data_model
             importre = re.compile(r"import (.+) {")
-            return importre.findall(data_model)
+            all_found = importre.findall(data_model)
+            all_found = [re.sub("['\"]", "", imp) for imp in all_found]
+            return all_found
         else:
             return []
 

@@ -5,3 +5,4 @@ mock ; python_version < '3.5'
 pytest-xdist
 yamllint
 lxml
+xmltodict

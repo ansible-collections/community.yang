@@ -30,6 +30,7 @@ ARGSPEC_CONDITIONALS = {
     "required_one_of": [["file", "content"]],
     "mutually_exclusive": [["file", "content"]],
 }
+VALID_CONNECTION_TYPES = ["ansible.netcommon.netconf"]
 
 
 def generate_argspec():
@@ -94,6 +95,15 @@ class ActionModule(ActionBase):
         :param kwargs:
         :return:
         """
+        if self._play_context.connection.split(".")[-1] != "netconf":
+            return {
+                "failed": True,
+                "msg": "Connection type %s is not valid for this module. Valid connection type is one of '%s'."
+                % (
+                    self._play_context.connection,
+                    ", ".join(VALID_CONNECTION_TYPES),
+                ),
+            }
         self._check_argspec()
         self._extended_check_argspec()
         if self._result.get("failed"):
