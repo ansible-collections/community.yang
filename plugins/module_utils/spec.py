@@ -86,7 +86,7 @@ class GenerateSpec(object):
                         raise AnsibleError("%s invalid file path" % yang_file)
                     self._yang_file_path.extend(_yang_files)
                 else:
-                    self._yang_file_path.extend(yang_file)
+                    self._yang_file_path.append(yang_file)
         # ensure file path entry is unique
         self._yang_file_path = list(set(self._yang_file_path))
 

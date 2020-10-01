@@ -78,7 +78,7 @@ class Translator(object):
                     raise AnsibleError("%s invalid file path" % yang_file)
                 self._yang_files.extend(_yang_files)
             else:
-                self._yang_files.extend(yang_file)
+                self._yang_files.append(yang_file)
         # ensure file path entry is unique
         self._yang_files = list(set(self._yang_files))
 
@@ -189,7 +189,10 @@ class Translator(object):
             + self._yang_files
             + [yang_metadata_path]
         )
-
+        display.vvvv(
+            "Generating jtox file '%s' by executing command '%s'"
+            % (jtox_file_path, " ".join(sys.argv))
+        )
         try:
             self._pyang_exec.run()
         except SystemExit:
@@ -230,6 +233,10 @@ class Translator(object):
             json_file_path,
         ]
 
+        display.vvvv(
+            "Generating xml file '%s' by executing command '%s'"
+            % (xml_file_path, " ".join(sys.argv))
+        )
         try:
             json2xml_exec.main()
             with open(xml_file_path, "r+") as fp:

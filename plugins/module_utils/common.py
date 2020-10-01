@@ -9,8 +9,6 @@ __metaclass__ = type
 import os
 import sys
 
-from collections import Sequence
-
 
 def to_list(val):
     if isinstance(val, (list, tuple, set)):
