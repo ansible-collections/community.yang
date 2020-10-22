@@ -81,6 +81,9 @@ class Translator(object):
                 self._yang_files.append(yang_file)
         # ensure file path entry is unique
         self._yang_files = list(set(self._yang_files))
+        # yang files can start with number,
+        # sort it to resolve import modules issue
+        self._yang_files.sort()
 
     def _handle_search_path(self, search_path):
         if search_path is None:
@@ -240,8 +243,12 @@ class Translator(object):
         try:
             json2xml_exec.main()
             with open(xml_file_path, "r+") as fp:
-                content = fp.read()
-
+                b_content = fp.read()
+                content = to_text(b_content, errors="surrogate_or_strict")
+        except UnicodeError as uni_error:
+            raise AnsibleError(
+                "Error while translating to text: %s" % str(uni_error)
+            )
         except SystemExit:
             pass
         finally:
@@ -271,7 +278,7 @@ class Translator(object):
                     ignore_errors=True,
                 )
 
-        return etree.tostring(root)
+        return etree.tostring(root).decode("utf-8")
 
     def xml_to_json(self, xml_data):
         """
