@@ -81,9 +81,6 @@ class Translator(object):
                 self._yang_files.append(yang_file)
         # ensure file path entry is unique
         self._yang_files = list(set(self._yang_files))
-        # yang files can start with number,
-        # sort it to resolve import modules issue
-        self._yang_files.sort()
 
     def _handle_search_path(self, search_path):
         if search_path is None:
