@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - Fixed json2xml py3 compatibility issues (https://github.com/ansible-collections/community.yang/pull/45)
