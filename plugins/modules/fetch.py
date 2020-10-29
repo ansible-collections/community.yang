@@ -30,8 +30,8 @@ options:
         name prefixed with `.yang` extension.
   continue_on_failure:
     description:
-      - This is an optional arguement that allows schema fetch to continue if  one the 
-        desired schemas fails download
+      - This is an optional arguement that allows schema fetch to continue if one the
+        desired models fails download
 requirements:
 - ncclient (>=v0.5.2)
 - pyang
