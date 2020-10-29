@@ -32,6 +32,8 @@ options:
     description:
       - This is an optional arguement that allows schema fetch to continue if one the
         desired models fails download
+    type: bool
+    default: false
 requirements:
 - ncclient (>=v0.5.2)
 - pyang
