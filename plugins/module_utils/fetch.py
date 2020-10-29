@@ -107,14 +107,18 @@ class SchemaStore(object):
             if not continue_on_error:
                 raise ValueError("Fail to fetch '%s' yang model" % schema_id)
             else:
-               display.vvv("Fail to fetch '%s' yang model" % schema_id)
-               result['failed_yang_models'].append(schema_id)
+                display.vvv("Fail to fetch '%s' yang model" % schema_id)
+                result["failed_yang_models"].append(schema_id)
 
         return found, data_model
 
-    def get_schema_and_dependants(self, schema_id, result, continue_on_failure=False):
+    def get_schema_and_dependants(
+        self, schema_id, result, continue_on_failure=False
+    ):
         try:
-            found, data_model = self.get_one_schema(schema_id, result, continue_on_failure)
+            found, data_model = self.get_one_schema(
+                schema_id, result, continue_on_failure
+            )
         except ValueError as exc:
             raise ValueError(exc)
 
@@ -140,7 +144,9 @@ class SchemaStore(object):
                 counter -= 1
                 continue
 
-            schema_dlist = self.get_schema_and_dependants(schema_id, result, continue_on_failure)
+            schema_dlist = self.get_schema_and_dependants(
+                schema_id, result, continue_on_failure
+            )
             for schema_id in schema_dlist:
                 if schema_id not in result["fetched"]:
                     sq.put(schema_id)

@@ -105,17 +105,21 @@ class ActionModule(ActionBase):
 
         result["fetched"] = dict()
         if continue_on_failure:
-           result['failed_yang_models'] = []
+            result["failed_yang_models"] = []
         total_count = 0
         try:
             supported_yang_modules = ss.get_schema_description()
             if schema:
                 if schema == "all":
                     for item in supported_yang_modules:
-                        changed, counter = ss.run(item, result, continue_on_failure)
+                        changed, counter = ss.run(
+                            item, result, continue_on_failure
+                        )
                         total_count += counter
                 else:
-                    changed, total_count = ss.run(schema, result, continue_on_failure)
+                    changed, total_count = ss.run(
+                        schema, result, continue_on_failure
+                    )
         except ValueError as exc:
             return {"failed": True, "msg": to_text(exc)}
 
