@@ -28,6 +28,12 @@ options:
       - This is an optional argument which provide the directory path in which the fetched
         yang modules will be saved. The name of the file is same as that of the yang module
         name prefixed with `.yang` extension.
+  continue_on_failure:
+    description:
+      - This is an optional arguement that allows schema fetch to continue if one the
+        desired models fails download
+    type: bool
+    default: false
 requirements:
 - ncclient (>=v0.5.2)
 - pyang
@@ -55,6 +61,11 @@ supported_yang_modules:
   returned: only when model name is not provided
   type: list
   sample: ["ietf-netconf-monitoring", "cisco-xr-ietf-netconf-monitoring-deviations"]
+failed_yang_modules:
+  decription: List of yang models that failed download
+  returned: only when continue_on_failure is true
+  type: list
+  sample: ["ietf-netconf-monitoring", "cisco-xr-ietf-netconf-monitoring-deviations"]
 """
 EXAMPLES = """
 - name: Fetch given yang model from remote host
@@ -71,4 +82,10 @@ EXAMPLES = """
   community.yang.fetch:
     name: all
     dir: "{{ playbook_dir }}/yang_files"
+
+- name: Fetch all the yang models supported by remote host and store it in dir location do not stop on error
+  community.yang.fetch:
+    name: all
+    dir: "{{ playbook_dir }}/yang_files"
+    continue_on_failure: true
 """

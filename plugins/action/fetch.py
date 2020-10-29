@@ -89,6 +89,7 @@ class ActionModule(ActionBase):
 
         schema = self._task.args.get("name")
         dir_path = self._task.args.get("dir")
+        continue_on_failure = self._task.args.get("continue_on_failure", False)
         socket_path = self._connection.socket_path
         conn = Connection(socket_path)
 
@@ -103,16 +104,22 @@ class ActionModule(ActionBase):
         ss = SchemaStore(conn)
 
         result["fetched"] = dict()
+        if continue_on_failure:
+            result["failed_yang_models"] = []
         total_count = 0
         try:
             supported_yang_modules = ss.get_schema_description()
             if schema:
                 if schema == "all":
                     for item in supported_yang_modules:
-                        changed, counter = ss.run(item, result)
+                        changed, counter = ss.run(
+                            item, result, continue_on_failure
+                        )
                         total_count += counter
                 else:
-                    changed, total_count = ss.run(schema, result)
+                    changed, total_count = ss.run(
+                        schema, result, continue_on_failure
+                    )
         except ValueError as exc:
             return {"failed": True, "msg": to_text(exc)}
 
