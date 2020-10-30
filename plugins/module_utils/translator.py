@@ -79,6 +79,11 @@ class Translator(object):
                 self._yang_files.extend(_yang_files)
             else:
                 self._yang_files.append(yang_file)
+
+        # glob.glob returns the files unordered when doing wildcard
+        # sort to fix some dependency issues
+        self._yang_files.sort()
+
         # ensure file path entry is unique
         self._yang_files = list(set(self._yang_files))
 
