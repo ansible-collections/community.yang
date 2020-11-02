@@ -65,7 +65,7 @@ import json
 
 from ansible.plugins.lookup import LookupBase
 from ansible.module_utils._text import to_text
-from ansible.errors import AnsibleError
+from ansible.errors import AnsibleLookupError
 
 from ansible_collections.community.yang.plugins.module_utils.translator import (
     Translator,
@@ -74,7 +74,7 @@ from ansible_collections.community.yang.plugins.module_utils.translator import (
 try:
     import pyang  # noqa
 except ImportError:
-    raise AnsibleError("pyang is not installed")
+    raise AnsibleLookupError("pyang is not installed")
 
 from ansible.utils.display import Display
 
@@ -88,12 +88,12 @@ class LookupModule(LookupBase):
         try:
             json_config = terms[0]
         except IndexError:
-            raise AnsibleError("path to json file must be specified")
+            raise AnsibleLookupError("path to json file must be specified")
 
         try:
             yang_file = kwargs["yang_file"]
         except KeyError:
-            raise AnsibleError("value of 'yang_file' must be specified")
+            raise AnsibleLookupError("value of 'yang_file' must be specified")
 
         search_path = kwargs.pop("search_path", "")
         keep_tmp_files = kwargs.pop("keep_tmp_files", False)
@@ -104,7 +104,7 @@ class LookupModule(LookupBase):
             with open(json_config) as fp:
                 json.load(fp)
         except Exception as exc:
-            raise AnsibleError(
+            raise AnsibleLookupError(
                 "Failed to load json configuration: %s"
                 % (to_text(exc, errors="surrogate_or_strict"))
             )
