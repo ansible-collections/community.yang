@@ -13,7 +13,6 @@ import sys
 import shutil
 import time
 import json
-import importlib
 import uuid
 
 from copy import deepcopy
@@ -23,6 +22,7 @@ from ansible.module_utils._text import to_text
 from ansible.module_utils.six import StringIO
 
 from ansible_collections.community.yang.plugins.module_utils.common import (
+    load_from_source,
     find_file_in_path,
     find_share_path,
     to_list,
@@ -104,7 +104,7 @@ class Translator(object):
             raise ValueError(missing_required_lib("lxml"))
         base_pyang_path = sys.modules["pyang"].__file__
         self._pyang_exec_path = find_file_in_path("pyang")
-        self._pyang_module = importlib.import_module("pyang")
+        self._pyang_module = load_from_source(self._pyang_exec_path, "pyang")
         sys.modules["pyang"].__file__ = base_pyang_path
 
     def json_to_xml(self, json_data, tmp_dir_path):
@@ -210,7 +210,7 @@ class Translator(object):
                 )
 
         json2xml_exec_path = find_file_in_path("json2xml")
-        json2xml_module = importlib.import_module("json2xml")
+        json2xml_module = load_from_source(json2xml_exec_path, "json2xml")
 
         # fill in the sys args before invoking json2xml
         sys.argv = [
