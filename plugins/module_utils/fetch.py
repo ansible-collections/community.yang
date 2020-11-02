@@ -18,8 +18,13 @@ else:
 from ansible.module_utils._text import to_text
 from ansible.module_utils.connection import ConnectionError
 
+# Note, this file can only be used on the control node
+# where ansible is installed
+# limit imports to action, filter, lookup, test plugins
 try:
     from ansible.utils.display import Display
+
+    display = Display()
 except ImportError:
     pass
 
@@ -29,8 +34,6 @@ try:
     HAS_XMLTODICT = True
 except ImportError:
     HAS_XMLTODICT = False
-
-display = Display()
 
 
 class SchemaStore(object):

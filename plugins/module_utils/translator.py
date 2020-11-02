@@ -22,6 +22,9 @@ from ansible.module_utils.basic import missing_required_lib
 from ansible.module_utils._text import to_text
 from ansible.module_utils.six import StringIO
 
+# Note, this file can only be used on the control node
+# where ansible is installed
+# limit imports to action, filter, lookup, test plugins
 try:
     from ansible.utils.path import unfrackpath, makedirs_safe
     from ansible.errors import AnsibleError

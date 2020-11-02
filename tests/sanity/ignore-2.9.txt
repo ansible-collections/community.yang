@@ -1,0 +1,3 @@
+plugins/module_utils/fetch.py pylint:ansible-bad-module-import # file's use is limited to action, filter, lookups on control node
+plugins/module_utils/spec.py pylint:ansible-bad-module-import # file's use is limited to action, filter, lookups on control node
+plugins/module_utils/translator.py pylint:ansible-bad-module-import # file's use is limited to action, filter, lookups on control node

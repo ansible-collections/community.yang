@@ -18,11 +18,14 @@ import subprocess
 from copy import deepcopy
 
 from ansible.module_utils.six import StringIO
+from ansible.module_utils.basic import missing_required_lib
 
+# Note, this file can only be used on the control node
+# where ansible is installed
+# limit imports to action, filter, lookup, test plugins
 try:
     from ansible.utils.path import unfrackpath, makedirs_safe
     from ansible.errors import AnsibleError
-    from ansible.utils.display import Display
 except ImportError:
     pass
 
@@ -31,12 +34,12 @@ from ansible_collections.community.yang.plugins.module_utils.common import (
     to_list,
 )
 
-display = Display()
-
 try:
     from pyang import error  # noqa: F401
+
+    HAS_PYANG = True
 except ImportError:
-    raise AnsibleError("pyang is not installed")
+    HAS_PYANG = False
 
 YANG_SPEC_DIR_PATH = "~/.ansible/tmp/yang/spec"
 
@@ -50,6 +53,9 @@ class GenerateSpec(object):
         doctype="config",
         keep_tmp_files=False,
     ):
+        if not HAS_PYANG:
+            raise ImportError(missing_required_lib("pyang"))
+
         yang_file_path = to_list(yang_file_path) if yang_file_path else []
         self._yang_file_path = []
         self._yang_content = yang_content
