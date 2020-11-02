@@ -13,7 +13,7 @@ import sys
 import shutil
 import time
 import json
-import imp
+import importlib
 import uuid
 
 from copy import deepcopy
@@ -104,7 +104,7 @@ class Translator(object):
             raise ValueError(missing_required_lib("lxml"))
         base_pyang_path = sys.modules["pyang"].__file__
         self._pyang_exec_path = find_file_in_path("pyang")
-        self._pyang_exec = imp.load_source("pyang", self._pyang_exec_path)
+        self._pyang_module = importlib.import_module("pyang")
         sys.modules["pyang"].__file__ = base_pyang_path
 
     def json_to_xml(self, json_data, tmp_dir_path):
@@ -186,7 +186,7 @@ class Translator(object):
                 % (jtox_file_path, " ".join(sys.argv))
             )
         try:
-            self._pyang_exec.run()
+            self._pyang_module.run()
         except SystemExit:
             pass
         except Exception as e:
@@ -210,7 +210,7 @@ class Translator(object):
                 )
 
         json2xml_exec_path = find_file_in_path("json2xml")
-        json2xml_exec = imp.load_source("json2xml", json2xml_exec_path)
+        json2xml_module = importlib.import_module("json2xml")
 
         # fill in the sys args before invoking json2xml
         sys.argv = [
@@ -229,7 +229,7 @@ class Translator(object):
                 % (xml_file_path, " ".join(sys.argv))
             )
         try:
-            json2xml_exec.main()
+            json2xml_module.main()
             with open(xml_file_path, "r+") as fp:
                 b_content = fp.read()
                 content = to_text(b_content, errors="surrogate_or_strict")
@@ -326,7 +326,6 @@ class Translator(object):
 
         base_pyang_path = sys.modules["pyang"].__file__
         pyang_exec_path = find_file_in_path("pyang")
-        pyang_exec = imp.load_source("pyang", pyang_exec_path)
 
         saved_arg = deepcopy(sys.argv)
         sys.modules["pyang"].__file__ = base_pyang_path
@@ -374,7 +373,7 @@ class Translator(object):
                 % (xls_file_path, " ".join(sys.argv))
             )
         try:
-            pyang_exec.run()
+            self._pyang_module.run()
         except SystemExit:
             pass
         except Exception as e:
