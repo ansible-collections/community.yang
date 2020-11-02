@@ -13,11 +13,15 @@ is_py2 = sys.version[0] == "2"
 if is_py2:
     import Queue as queue
 else:
-    import queue as queue
+    import queue
 
 from ansible.module_utils._text import to_text
 from ansible.module_utils.connection import ConnectionError
-from ansible.utils.display import Display
+
+try:
+    from ansible.utils.display import Display
+except ImportError:
+    pass
 
 try:
     import xmltodict

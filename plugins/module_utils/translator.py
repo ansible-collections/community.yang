@@ -21,9 +21,13 @@ from copy import deepcopy
 from ansible.module_utils.basic import missing_required_lib
 from ansible.module_utils._text import to_text
 from ansible.module_utils.six import StringIO
-from ansible.utils.path import unfrackpath, makedirs_safe
-from ansible.errors import AnsibleError
-from ansible.utils.display import Display
+
+try:
+    from ansible.utils.path import unfrackpath, makedirs_safe
+    from ansible.errors import AnsibleError
+    from ansible.utils.display import Display
+except ImportError:
+    pass
 
 from ansible_collections.community.yang.plugins.module_utils.common import (
     find_file_in_path,

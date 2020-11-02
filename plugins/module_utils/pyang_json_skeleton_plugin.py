@@ -10,7 +10,7 @@ import optparse
 import json
 
 from pyang import plugin, error
-from collections import Sequence
+from ansible.module_utils.common._collections_compat import Sequence
 
 
 def to_list(val):
