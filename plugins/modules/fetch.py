@@ -62,7 +62,7 @@ supported_yang_modules:
   type: list
   sample: ["ietf-netconf-monitoring", "cisco-xr-ietf-netconf-monitoring-deviations"]
 failed_yang_modules:
-  decription: List of yang models that failed download
+  description: List of yang models that failed download
   returned: only when continue_on_failure is true
   type: list
   sample: ["ietf-netconf-monitoring", "cisco-xr-ietf-netconf-monitoring-deviations"]
