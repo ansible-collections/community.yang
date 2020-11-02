@@ -78,10 +78,24 @@ except ImportError:
 
 from ansible.utils.display import Display
 
+from ansible_collections.community.yang.plugins.common.base import (
+    create_tmp_dir,
+    JSON2XML_DIR_PATH,
+)
+
 display = Display()
 
 
 class LookupModule(LookupBase):
+    def _debug(self, msg):
+        """Output text using ansible's display
+
+        :param msg: The message
+        :type msg: str
+        """
+        msg = "[json2xml][lookup] {msg}".format(msg=msg)
+        display.vvvv(msg)
+
     def run(self, terms, variables, **kwargs):
 
         res = []
@@ -109,11 +123,14 @@ class LookupModule(LookupBase):
                 % (to_text(exc, errors="surrogate_or_strict"))
             )
 
+        tmp_dir_path = create_tmp_dir(JSON2XML_DIR_PATH)
         doctype = kwargs.get("doctype", "config")
 
-        tl = Translator(yang_file, search_path, doctype, keep_tmp_files)
+        tl = Translator(
+            yang_file, search_path, doctype, keep_tmp_files, debug=self._debug
+        )
 
-        xml_data = tl.json_to_xml(json_config)
+        xml_data = tl.json_to_xml(json_config, tmp_dir_path)
         res.append(xml_data)
 
         return res

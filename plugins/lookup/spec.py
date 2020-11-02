@@ -188,6 +188,10 @@ from ansible.errors import AnsibleError
 from ansible_collections.community.yang.plugins.module_utils.spec import (
     GenerateSpec,
 )
+from ansible_collections.community.yang.plugins.common.base import (
+    create_tmp_dir,
+    YANG_SPEC_DIR_PATH,
+)
 
 from ansible.utils.display import Display
 
@@ -227,11 +231,14 @@ class LookupModule(LookupBase):
                 % (path, ", ".join(valid_doctype))
             )
 
+        tmp_dir_path = create_tmp_dir(YANG_SPEC_DIR_PATH)
+
         genspec_obj = GenerateSpec(
             yang_file_path=yang_file,
             search_path=search_path,
             doctype=doctype,
             keep_tmp_files=keep_tmp_files,
+            tmp_dir_path=tmp_dir_path,
         )
         output["json_skeleton"] = genspec_obj.generate_json_schema(
             defaults=defaults

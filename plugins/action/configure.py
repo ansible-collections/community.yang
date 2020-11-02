@@ -32,6 +32,10 @@ from ansible_collections.community.yang.plugins.modules.configure import (
 from ansible_collections.community.yang.plugins.module_utils.translator import (
     Translator,
 )
+from ansible_collections.community.yang.plugins.common.base import (
+    create_tmp_dir,
+    JSON2XML_DIR_PATH,
+)
 
 VALID_CONNECTION_TYPES = ["ansible.netcommon.netconf"]
 
@@ -55,6 +59,17 @@ class ActionModule(ActionBase):
         """
         msg = msg.replace("(basic.py)", self._task.action)
         raise AnsibleActionFail(msg)
+
+    def _debug(self, msg):
+        """Output text using ansible's display
+
+        :param msg: The message
+        :type msg: str
+        """
+        msg = "<{phost}> [configure][{plugin}] {msg}".format(
+            phost=self._playhost, plugin=self._plugin, msg=msg
+        )
+        self._display.vvvv(msg)
 
     def _check_argspec(self):
         """ Load the doc and convert
@@ -111,6 +126,8 @@ class ActionModule(ActionBase):
                     ", ".join(VALID_CONNECTION_TYPES),
                 ),
             }
+        self._playhost = task_vars.get("inventory_hostname")
+
         self._check_argspec()
         self._extended_check_argspec()
         if self._result.get("failed"):
@@ -128,8 +145,10 @@ class ActionModule(ActionBase):
             raise AnsibleConnectionError(
                 "netconf connection to remote host in not active"
             )
-        tl = Translator(yang_files, search_path)
-        xml_data = tl.json_to_xml(json_config)
+        tmp_dir_path = create_tmp_dir(JSON2XML_DIR_PATH)
+
+        tl = Translator(yang_files, search_path, debug=self._debug)
+        xml_data = tl.json_to_xml(json_config, tmp_dir_path)
 
         parser = XMLParser(ns_clean=True, recover=True, encoding="utf-8")
         xml_data = fromstring(xml_data, parser=parser)

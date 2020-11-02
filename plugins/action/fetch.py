@@ -55,6 +55,17 @@ class ActionModule(ActionBase):
         msg = msg.replace("(basic.py)", self._task.action)
         raise AnsibleActionFail(msg)
 
+    def _debug(self, msg):
+        """Output text using ansible's display
+
+        :param msg: The message
+        :type msg: str
+        """
+        msg = "<{phost}> [fetch][{plugin}] {msg}".format(
+            phost=self._playhost, plugin=self._plugin, msg=msg
+        )
+        self._display.vvvv(msg)
+
     def _check_argspec(self):
         """ Load the doc and convert
         Add the root conditionals to what was returned from the conversion
@@ -77,6 +88,7 @@ class ActionModule(ActionBase):
                     ", ".join(VALID_CONNECTION_TYPES),
                 ),
             }
+        self._playhost = task_vars.get("inventory_hostname")
 
         self._check_argspec()
         if self._result.get("failed"):
@@ -101,7 +113,7 @@ class ActionModule(ActionBase):
                 "remote netconf server does not support required capability"
                 " to fetch yang schema (urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring)."
             )
-        ss = SchemaStore(conn)
+        ss = SchemaStore(conn, debug=self._debug)
 
         result["fetched"] = dict()
         if continue_on_failure:

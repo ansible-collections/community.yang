@@ -20,15 +20,6 @@ from copy import deepcopy
 from ansible.module_utils.six import StringIO
 from ansible.module_utils.basic import missing_required_lib
 
-# Note, this file can only be used on the control node
-# where ansible is installed
-# limit imports to action, filter, lookup, test plugins
-try:
-    from ansible.utils.path import unfrackpath, makedirs_safe
-    from ansible.errors import AnsibleError
-except ImportError:
-    pass
-
 from ansible_collections.community.yang.plugins.module_utils.common import (
     find_file_in_path,
     to_list,
@@ -52,6 +43,7 @@ class GenerateSpec(object):
         search_path=None,
         doctype="config",
         keep_tmp_files=False,
+        tmp_dir_path=YANG_SPEC_DIR_PATH,
     ):
         if not HAS_PYANG:
             raise ImportError(missing_required_lib("pyang"))
@@ -63,21 +55,20 @@ class GenerateSpec(object):
         self._keep_tmp_files = keep_tmp_files
         self._pyang_exec_path = find_file_in_path("pyang")
 
-        self._plugindir = unfrackpath(YANG_SPEC_DIR_PATH)
-        makedirs_safe(self._plugindir)
+        self._tmp_dir_path = tmp_dir_path
 
         self._handle_yang_file_path(yang_file_path)
         self._handle_search_path(search_path)
 
     def __del__(self):
         if not self._keep_tmp_files:
-            shutil.rmtree(self._plugindir, ignore_errors=True)
+            shutil.rmtree(self._tmp_dir_path, ignore_errors=True)
         super(GenerateSpec, self).__del__()
 
     def _handle_yang_file_path(self, yang_files):
         if not yang_files:
             content_tmp_file_path = os.path.join(
-                YANG_SPEC_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "yang")
+                self._tmp_dir_path, "%s.%s" % (str(uuid.uuid4()), "yang")
             )
             content_tmp_file_path = os.path.realpath(
                 os.path.expanduser(content_tmp_file_path)
@@ -93,7 +84,7 @@ class GenerateSpec(object):
                     _yang_files = glob.glob(yang_file)
                     if not _yang_files:
                         # Glob returned no files
-                        raise AnsibleError("%s invalid file path" % yang_file)
+                        raise ValueError("%s invalid file path" % yang_file)
                     self._yang_file_path.extend(_yang_files)
                 else:
                     self._yang_file_path.append(yang_file)
@@ -112,7 +103,7 @@ class GenerateSpec(object):
             else:
                 abs_search_path += ":" + path
             if path != "" and not os.path.isdir(path):
-                raise AnsibleError("%s is invalid directory path" % path)
+                raise ValueError("%s is invalid directory path" % path)
 
         self._search_path = abs_search_path
 
@@ -132,7 +123,7 @@ class GenerateSpec(object):
         sys.stdout = sys.stderr = StringIO()
 
         tree_tmp_file_path = os.path.join(
-            YANG_SPEC_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "txt")
+            self._tmp_dir_path, "%s.%s" % (str(uuid.uuid4()), "txt")
         )
         tree_tmp_file_path = os.path.realpath(
             os.path.expanduser(tree_tmp_file_path)
@@ -158,10 +149,10 @@ class GenerateSpec(object):
         except Exception as e:
             if not self._keep_tmp_files:
                 shutil.rmtree(
-                    os.path.realpath(os.path.expanduser(YANG_SPEC_DIR_PATH)),
+                    os.path.realpath(os.path.expanduser(self._tmp_dir_path)),
                     ignore_errors=True,
                 )
-            raise AnsibleError(
+            raise ValueError(
                 "Error while generating skeleton xml file: %s" % e.output
             )
         finally:
@@ -170,13 +161,11 @@ class GenerateSpec(object):
                 if not self._keep_tmp_files:
                     shutil.rmtree(
                         os.path.realpath(
-                            os.path.expanduser(YANG_SPEC_DIR_PATH)
+                            os.path.expanduser(self._tmp_dir_path)
                         ),
                         ignore_errors=True,
                     )
-                raise AnsibleError(
-                    "Error while generating tree file: %s" % err
-                )
+                raise ValueError("Error while generating tree file: %s" % err)
 
         sys.stdout.flush()
         sys.stderr.flush()
@@ -219,7 +208,7 @@ class GenerateSpec(object):
         sys.stdout = sys.stderr = StringIO()
 
         xml_tmp_file_path = os.path.join(
-            YANG_SPEC_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "xml")
+            self._tmp_dir_path, "%s.%s" % (str(uuid.uuid4()), "xml")
         )
         xml_tmp_file_path = os.path.realpath(
             os.path.expanduser(xml_tmp_file_path)
@@ -255,10 +244,10 @@ class GenerateSpec(object):
         except Exception as e:
             if not self._keep_tmp_files:
                 shutil.rmtree(
-                    os.path.realpath(os.path.expanduser(YANG_SPEC_DIR_PATH)),
+                    os.path.realpath(os.path.expanduser(self._tmp_dir_path)),
                     ignore_errors=True,
                 )
-            raise AnsibleError(
+            raise ValueError(
                 "Error while generating skeleton xml file: %s" % e.output
             )
         finally:
@@ -267,11 +256,11 @@ class GenerateSpec(object):
                 if not self._keep_tmp_files:
                     shutil.rmtree(
                         os.path.realpath(
-                            os.path.expanduser(YANG_SPEC_DIR_PATH)
+                            os.path.expanduser(self._tmp_dir_path)
                         ),
                         ignore_errors=True,
                     )
-                raise AnsibleError(
+                raise ValueError(
                     "Error while generating skeleton xml file: %s" % err
                 )
 
@@ -313,7 +302,7 @@ class GenerateSpec(object):
         sys.stdout = sys.stderr = StringIO()
 
         json_tmp_file_path = os.path.join(
-            YANG_SPEC_DIR_PATH, "%s.%s" % (str(uuid.uuid4()), "json")
+            self._tmp_dir_path, "%s.%s" % (str(uuid.uuid4()), "json")
         )
         json_tmp_file_path = os.path.realpath(
             os.path.expanduser(json_tmp_file_path)
@@ -321,14 +310,14 @@ class GenerateSpec(object):
 
         plugin_file_src = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
-            "pyang_json_skeleton_plugin.py",
+            "../pyang/plugins/json_skeleton_plugin.py",
         )
-        shutil.copy(plugin_file_src, self._plugindir)
+        shutil.copy(plugin_file_src, self._tmp_dir_path)
         # fill in the sys args before invoking pyang to retrieve json skeleton
         sample_json_skeleton_cmd = [
             self._pyang_exec_path,
             "--plugindir",
-            self._plugindir,
+            self._tmp_dir_path,
             "-f",
             "sample-json-skeleton",
             "-o",
@@ -354,10 +343,10 @@ class GenerateSpec(object):
         except Exception as e:
             if not self._keep_tmp_files:
                 shutil.rmtree(
-                    os.path.realpath(os.path.expanduser(YANG_SPEC_DIR_PATH)),
+                    os.path.realpath(os.path.expanduser(self._tmp_dir_path)),
                     ignore_errors=True,
                 )
-            raise AnsibleError(
+            raise ValueError(
                 "Error while generating skeleton json file: %s" % e.output
             )
         finally:
@@ -366,11 +355,11 @@ class GenerateSpec(object):
                 if not self._keep_tmp_files:
                     shutil.rmtree(
                         os.path.realpath(
-                            os.path.expanduser(YANG_SPEC_DIR_PATH)
+                            os.path.expanduser(self._tmp_dir_path)
                         ),
                         ignore_errors=True,
                     )
-                raise AnsibleError(
+                raise ValueError(
                     "Error while generating json schema: %s" % err
                 )
 

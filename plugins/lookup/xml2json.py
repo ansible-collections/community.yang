@@ -63,6 +63,11 @@ from ansible_collections.community.yang.plugins.module_utils.translator import (
     Translator,
 )
 
+from ansible_collections.community.yang.plugins.common.base import (
+    create_tmp_dir,
+    XM2JSON_DIR_PATH,
+)
+
 try:
     import pyang  # noqa
 except ImportError:
@@ -72,10 +77,17 @@ from ansible.utils.display import Display
 
 display = Display()
 
-XM2JSONL_DIR_PATH = "~/.ansible/tmp/xml2json"
-
 
 class LookupModule(LookupBase):
+    def _debug(self, msg):
+        """Output text using ansible's display
+
+        :param msg: The message
+        :type msg: str
+        """
+        msg = "[xml2json][lookup] {msg}".format(msg=msg)
+        display.vvvv(msg)
+
     def run(self, terms, variables, **kwargs):
 
         res = []
@@ -92,11 +104,16 @@ class LookupModule(LookupBase):
         search_path = kwargs.pop("search_path", "")
         keep_tmp_files = kwargs.pop("keep_tmp_files", False)
 
+        tmp_dir_path = create_tmp_dir(XM2JSON_DIR_PATH)
+
         tl = Translator(
-            yang_file, search_path=search_path, keep_tmp_files=keep_tmp_files
+            yang_file,
+            search_path=search_path,
+            keep_tmp_files=keep_tmp_files,
+            debug=self._debug,
         )
 
-        json_data = tl.xml_to_json(xml_file)
+        json_data = tl.xml_to_json(xml_file, tmp_dir_path)
         res.append(json_data)
 
         return res

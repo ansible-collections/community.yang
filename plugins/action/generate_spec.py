@@ -11,15 +11,22 @@ __metaclass__ = type
 import json
 from ansible.plugins.action import ActionBase
 import os
+
+
 from ansible.module_utils._text import to_bytes
 from ansible.module_utils import basic
 from ansible.errors import AnsibleActionFail
+
 from ansible_collections.community.yang.plugins.module_utils.spec import (
     GenerateSpec,
 )
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
     convert_doc_to_ansible_module_kwargs,
     dict_merge,
+)
+from ansible_collections.community.yang.plugins.common.base import (
+    create_tmp_dir,
+    YANG_SPEC_DIR_PATH,
 )
 from ansible_collections.community.yang.plugins.modules.generate_spec import (
     DOCUMENTATION,
@@ -53,6 +60,17 @@ class ActionModule(ActionBase):
         """
         msg = msg.replace("(basic.py)", self._task.action)
         raise AnsibleActionFail(msg)
+
+    def _debug(self, msg):
+        """Output text using ansible's display
+
+        :param msg: The message
+        :type msg: str
+        """
+        msg = "<{phost}> [generate_spec][{plugin}] {msg}".format(
+            phost=self._playhost, plugin=self._plugin, msg=msg
+        )
+        self._display.vvvv(msg)
 
     def _check_argspec(self):
         """ Load the doc and convert
@@ -100,6 +118,8 @@ class ActionModule(ActionBase):
                     ", ".join(VALID_CONNECTION_TYPES),
                 ),
             }
+        self._playhost = task_vars.get("inventory_hostname")
+
         self._check_argspec()
         self._extended_check_argspec()
         if self._result.get("failed"):
@@ -114,11 +134,14 @@ class ActionModule(ActionBase):
         tree_schema = self._task.args.get("tree_schema") or {}
         json_schema = self._task.args.get("json_schema") or {}
 
+        tmp_dir_path = create_tmp_dir(YANG_SPEC_DIR_PATH)
+
         genspec_obj = GenerateSpec(
             yang_content=yang_content,
             yang_file_path=yang_files,
             search_path=search_path,
             doctype=doctype,
+            tmp_dir_path=tmp_dir_path,
         )
         defaults = False
         schema_out_path = None

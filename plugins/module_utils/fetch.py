@@ -18,16 +18,6 @@ else:
 from ansible.module_utils._text import to_text
 from ansible.module_utils.connection import ConnectionError
 
-# Note, this file can only be used on the control node
-# where ansible is installed
-# limit imports to action, filter, lookup, test plugins
-try:
-    from ansible.utils.display import Display
-
-    display = Display()
-except ImportError:
-    pass
-
 try:
     import xmltodict
 
@@ -37,11 +27,12 @@ except ImportError:
 
 
 class SchemaStore(object):
-    def __init__(self, conn):
+    def __init__(self, conn, debug=None):
         self._conn = conn
         self._schema_cache = []
         self._all_schema_list = None
         self._all_schema_identifier_list = []
+        self._debug = debug
 
     def get_schema_description(self):
         if not HAS_XMLTODICT:
@@ -107,14 +98,16 @@ class SchemaStore(object):
                 raise ValueError(to_text(e))
             res_json = xmltodict.parse(response, dict_constructor=dict)
             data_model = res_json["rpc-reply"]["data"]["#text"]
-            display.vvv("Fetched '%s' yang model" % schema_id)
+            if self._debug:
+                self._debug("Fetched '%s' yang model" % schema_id)
             result["fetched"][schema_id] = data_model
             self._schema_cache.append(schema_cache_entry)
         else:
             if not continue_on_error:
                 raise ValueError("Fail to fetch '%s' yang model" % schema_id)
             else:
-                display.vvv("Fail to fetch '%s' yang model" % schema_id)
+                if self._debug:
+                    self._debug("Fail to fetch '%s' yang model" % schema_id)
                 result["failed_yang_models"].append(schema_id)
 
         return found, data_model
