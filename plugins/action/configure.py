@@ -66,8 +66,8 @@ class ActionModule(ActionBase):
         :param msg: The message
         :type msg: str
         """
-        msg = "<{phost}> [configure][{plugin}] {msg}".format(
-            phost=self._playhost, plugin=self._plugin, msg=msg
+        msg = "<{phost}> [configure][action] {msg}".format(
+            phost=self._playhost, msg=msg
         )
         self._display.vvvv(msg)
 
