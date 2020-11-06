@@ -33,7 +33,7 @@
 - assert:
     that:
       - "result.failed == true"
-      - "'invalid yang_file path' in result.msg"
+      - "'invalid file path' in result.msg"
 
 - name: test for invalid search_path value
   community.yang.get:
