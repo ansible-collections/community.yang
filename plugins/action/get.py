@@ -12,7 +12,7 @@ import json
 import os
 
 from ansible.plugins.action import ActionBase
-from ansible.module_utils._text import to_bytes
+from ansible.module_utils._text import to_bytes, to_text
 from ansible.module_utils import basic
 from ansible.module_utils.connection import (
     ConnectionError as AnsibleConnectionError,
@@ -42,7 +42,7 @@ class ActionModule(ActionBase):
         self._result = {}
 
     def _fail_json(self, msg):
-        """ Replace the AnsibleModule fai_json here
+        """ Replace the AnsibleModule fail_json here
         :param msg: The message for the failure
         :type msg: str
         """
@@ -144,11 +144,27 @@ class ActionModule(ActionBase):
         if result.get("failed"):
             return result
 
-        tmp_dir_path = create_tmp_dir(XM2JSON_DIR_PATH)
+        try:
+            tmp_dir_path = create_tmp_dir(XM2JSON_DIR_PATH)
 
-        # convert XML data to JSON data as per RFC 7951 format
-        tl = Translator(yang_files, search_path=search_path, debug=self._debug)
-        result["json_data"] = tl.xml_to_json(result["stdout"], tmp_dir_path)
+            # convert XML data to JSON data as per RFC 7951 format
+            tl = Translator(
+                yang_files, search_path=search_path, debug=self._debug
+            )
+            result["json_data"] = tl.xml_to_json(
+                result["stdout"], tmp_dir_path
+            )
+        except ValueError as exc:
+            raise AnsibleActionFail(
+                to_text(exc, errors="surrogate_then_replace")
+            )
+        except Exception as exc:
+            raise AnsibleActionFail(
+                "Unhandled exception from [action][get]. Error: {err}".format(
+                    err=to_text(exc, errors="surrogate_then_replace")
+                )
+            )
+
         result["xml_data"] = result["stdout"]
         result.pop("stdout", None)
         result.pop("stdout_lines", None)

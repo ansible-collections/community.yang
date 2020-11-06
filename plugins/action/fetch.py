@@ -113,7 +113,19 @@ class ActionModule(ActionBase):
                 "remote netconf server does not support required capability"
                 " to fetch yang schema (urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring)."
             )
-        ss = SchemaStore(conn, debug=self._debug)
+
+        try:
+            ss = SchemaStore(conn, debug=self._debug)
+        except ValueError as exc:
+            raise AnsibleActionFail(
+                to_text(exc, errors="surrogate_then_replace")
+            )
+        except Exception as exc:
+            raise AnsibleActionFail(
+                "Unhandled exception from fetch SchemaStore. Error: {err}".format(
+                    err=to_text(exc, errors="surrogate_then_replace")
+                )
+            )
 
         result["fetched"] = dict()
         if continue_on_failure:
@@ -133,7 +145,15 @@ class ActionModule(ActionBase):
                         schema, result, continue_on_failure
                     )
         except ValueError as exc:
-            return {"failed": True, "msg": to_text(exc)}
+            raise AnsibleActionFail(
+                to_text(exc, errors="surrogate_then_replace")
+            )
+        except Exception as exc:
+            raise AnsibleActionFail(
+                "Unhandled exception from get schema description. Error: {err}".format(
+                    err=to_text(exc, errors="surrogate_then_replace")
+                )
+            )
 
         if schema:
             if dir_path:

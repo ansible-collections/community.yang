@@ -13,7 +13,7 @@ from ansible.plugins.action import ActionBase
 import os
 
 
-from ansible.module_utils._text import to_bytes
+from ansible.module_utils._text import to_bytes, to_text
 from ansible.module_utils import basic
 from ansible.errors import AnsibleActionFail
 
@@ -134,46 +134,57 @@ class ActionModule(ActionBase):
         tree_schema = self._task.args.get("tree_schema") or {}
         json_schema = self._task.args.get("json_schema") or {}
 
-        tmp_dir_path = create_tmp_dir(YANG_SPEC_DIR_PATH)
+        try:
+            tmp_dir_path = create_tmp_dir(YANG_SPEC_DIR_PATH)
 
-        genspec_obj = GenerateSpec(
-            yang_content=yang_content,
-            yang_file_path=yang_files,
-            search_path=search_path,
-            doctype=doctype,
-            tmp_dir_path=tmp_dir_path,
-        )
-        defaults = False
-        schema_out_path = None
-        if json_schema:
-            if "defaults" in json_schema:
-                defaults = json_schema["defaults"]
-            if "path" in json_schema:
-                schema_out_path = json_schema["path"]
-        result["json_schema"] = genspec_obj.generate_json_schema(
-            schema_out_path=schema_out_path, defaults=defaults
-        )
-        defaults = False
-        schema_out_path = None
-        annotations = False
+            genspec_obj = GenerateSpec(
+                yang_content=yang_content,
+                yang_file_path=yang_files,
+                search_path=search_path,
+                doctype=doctype,
+                tmp_dir_path=tmp_dir_path,
+            )
+            defaults = False
+            schema_out_path = None
+            if json_schema:
+                if "defaults" in json_schema:
+                    defaults = json_schema["defaults"]
+                if "path" in json_schema:
+                    schema_out_path = json_schema["path"]
+            result["json_schema"] = genspec_obj.generate_json_schema(
+                schema_out_path=schema_out_path, defaults=defaults
+            )
+            defaults = False
+            schema_out_path = None
+            annotations = False
 
-        if xml_schema:
-            if "defaults" in xml_schema:
-                defaults = xml_schema["defaults"]
-            if "path" in xml_schema:
-                schema_out_path = xml_schema["path"]
-            if "annotations" in xml_schema:
-                annotations = xml_schema["annotations"]
-        result["xml_schema"] = genspec_obj.generate_xml_schema(
-            schema_out_path=schema_out_path,
-            defaults=defaults,
-            annotations=annotations,
-        )
-        schema_out_path = None
-        if tree_schema and "path" in tree_schema:
-            schema_out_path = tree_schema["path"]
-        result["tree_schema"] = genspec_obj.generate_tree_schema(
-            schema_out_path=schema_out_path
-        )
+            if xml_schema:
+                if "defaults" in xml_schema:
+                    defaults = xml_schema["defaults"]
+                if "path" in xml_schema:
+                    schema_out_path = xml_schema["path"]
+                if "annotations" in xml_schema:
+                    annotations = xml_schema["annotations"]
+            result["xml_schema"] = genspec_obj.generate_xml_schema(
+                schema_out_path=schema_out_path,
+                defaults=defaults,
+                annotations=annotations,
+            )
+            schema_out_path = None
+            if tree_schema and "path" in tree_schema:
+                schema_out_path = tree_schema["path"]
+            result["tree_schema"] = genspec_obj.generate_tree_schema(
+                schema_out_path=schema_out_path
+            )
+        except ValueError as exc:
+            raise AnsibleActionFail(
+                to_text(exc, errors="surrogate_then_replace")
+            )
+        except Exception as exc:
+            raise AnsibleActionFail(
+                "Unhandled exception from [action][generate_spec]. Error: {err}".format(
+                    err=to_text(exc, errors="surrogate_then_replace")
+                )
+            )
 
         return result

@@ -185,6 +185,7 @@ RETURN = """
 import os
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleLookupError
+from ansible.module_utils._text import to_text
 from ansible_collections.community.yang.plugins.module_utils.spec import (
     GenerateSpec,
 )
@@ -231,25 +232,36 @@ class LookupModule(LookupBase):
                 % (path, ", ".join(valid_doctype))
             )
 
-        tmp_dir_path = create_tmp_dir(YANG_SPEC_DIR_PATH)
+        try:
+            tmp_dir_path = create_tmp_dir(YANG_SPEC_DIR_PATH)
 
-        genspec_obj = GenerateSpec(
-            yang_file_path=yang_file,
-            search_path=search_path,
-            doctype=doctype,
-            keep_tmp_files=keep_tmp_files,
-            tmp_dir_path=tmp_dir_path,
-        )
-        output["json_skeleton"] = genspec_obj.generate_json_schema(
-            defaults=defaults
-        )
-        defaults = False
+            genspec_obj = GenerateSpec(
+                yang_file_path=yang_file,
+                search_path=search_path,
+                doctype=doctype,
+                keep_tmp_files=keep_tmp_files,
+                tmp_dir_path=tmp_dir_path,
+            )
+            output["json_skeleton"] = genspec_obj.generate_json_schema(
+                defaults=defaults
+            )
+            defaults = False
 
-        output["xml_skeleton"] = genspec_obj.generate_xml_schema(
-            defaults=defaults, annotations=annotations
-        )
-        output["tree"] = genspec_obj.generate_tree_schema()
+            output["xml_skeleton"] = genspec_obj.generate_xml_schema(
+                defaults=defaults, annotations=annotations
+            )
+            output["tree"] = genspec_obj.generate_tree_schema()
 
-        res.append(output)
+            res.append(output)
+        except ValueError as exc:
+            raise AnsibleLookupError(
+                to_text(exc, errors="surrogate_then_replace")
+            )
+        except Exception as exc:
+            raise AnsibleLookupError(
+                "Unhandled exception from [lookup][spec]. Error: {err}".format(
+                    err=to_text(exc, errors="surrogate_then_replace")
+                )
+            )
 
         return res

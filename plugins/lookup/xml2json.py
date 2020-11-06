@@ -58,6 +58,7 @@ _raw:
 
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleLookupError
+from ansible.module_utils._text import to_text
 
 from ansible_collections.community.yang.plugins.module_utils.translator import (
     Translator,
@@ -104,16 +105,28 @@ class LookupModule(LookupBase):
         search_path = kwargs.pop("search_path", "")
         keep_tmp_files = kwargs.pop("keep_tmp_files", False)
 
-        tmp_dir_path = create_tmp_dir(XM2JSON_DIR_PATH)
+        try:
+            tmp_dir_path = create_tmp_dir(XM2JSON_DIR_PATH)
 
-        tl = Translator(
-            yang_file,
-            search_path=search_path,
-            keep_tmp_files=keep_tmp_files,
-            debug=self._debug,
-        )
+            tl = Translator(
+                yang_file,
+                search_path=search_path,
+                keep_tmp_files=keep_tmp_files,
+                debug=self._debug,
+            )
 
-        json_data = tl.xml_to_json(xml_file, tmp_dir_path)
+            json_data = tl.xml_to_json(xml_file, tmp_dir_path)
+        except ValueError as exc:
+            raise AnsibleLookupError(
+                to_text(exc, errors="surrogate_then_replace")
+            )
+        except Exception as exc:
+            raise AnsibleLookupError(
+                "Unhandled exception from [lookup][xml2json]. Error: {err}".format(
+                    err=to_text(exc, errors="surrogate_then_replace")
+                )
+            )
+
         res.append(json_data)
 
         return res

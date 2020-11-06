@@ -123,14 +123,30 @@ class LookupModule(LookupBase):
                 % (to_text(exc, errors="surrogate_or_strict"))
             )
 
-        tmp_dir_path = create_tmp_dir(JSON2XML_DIR_PATH)
-        doctype = kwargs.get("doctype", "config")
+        try:
+            tmp_dir_path = create_tmp_dir(JSON2XML_DIR_PATH)
+            doctype = kwargs.get("doctype", "config")
 
-        tl = Translator(
-            yang_file, search_path, doctype, keep_tmp_files, debug=self._debug
-        )
+            tl = Translator(
+                yang_file,
+                search_path,
+                doctype,
+                keep_tmp_files,
+                debug=self._debug,
+            )
 
-        xml_data = tl.json_to_xml(json_config, tmp_dir_path)
+            xml_data = tl.json_to_xml(json_config, tmp_dir_path)
+        except ValueError as exc:
+            raise AnsibleLookupError(
+                to_text(exc, errors="surrogate_then_replace")
+            )
+        except Exception as exc:
+            raise AnsibleLookupError(
+                "Unhandled exception from [lookup][json2xml]. Error: {err}".format(
+                    err=to_text(exc, errors="surrogate_then_replace")
+                )
+            )
+
         res.append(xml_data)
 
         return res
