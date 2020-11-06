@@ -48,7 +48,7 @@ class TestValidate(unittest.TestCase):
 
         # invalid json file value arguments
         kwargs = {"yang_file": OC_INTF_XML_CONFIG_FILE_PATH}
-        with self.assertRaises(ValueError) as error:
+        with self.assertRaises(AnsibleLookupError) as error:
             self._lp.run(["invalid path"], LOOKUP_VARIABLES, **kwargs)
         self.assertIn(
             "Unable to create file or read XML data", str(error.exception)
