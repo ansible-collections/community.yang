@@ -9,6 +9,15 @@ __metaclass__ = type
 import os
 import sys
 
+try:
+    import importlib.util
+
+    imp = None
+except ImportError:
+    import imp
+
+from ansible.module_utils._text import to_bytes, to_native
+
 
 def to_list(val):
     if isinstance(val, (list, tuple, set)):
@@ -40,3 +49,17 @@ def find_share_path(filename):
         share_path = os.path.join(env_path, "share")
         if os.path.isfile(os.path.join(share_path, filename)):
             return share_path
+
+
+def load_from_source(path, name):
+    if imp is None:
+        loader = importlib.machinery.SourceFileLoader(name, path)
+        module = loader.load_module()
+        sys.modules[name] = module
+    else:
+        with open(to_bytes(path), "rb") as module_file:
+            # to_native is used here because imp.load_source's path is for tracebacks and python's traceback formatting uses native strings
+            module = imp.load_source(
+                to_native(name), to_native(path), module_file
+            )
+    return module

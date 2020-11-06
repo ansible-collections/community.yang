@@ -66,7 +66,7 @@ It's preferable to use content in this collection using their Fully Qualified Co
   connection: ansible.netcommon.netconf
 
   tasks:
-    - name: Fetch given yang model and it’s dependent models from remote host
+    - name: "Fetch given yang model and all the dependent models from remote host"
       community.yang.fetch:
         name: Cisco-IOS-XR-ifmgr-cfg
 

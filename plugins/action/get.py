@@ -12,7 +12,7 @@ import json
 import os
 
 from ansible.plugins.action import ActionBase
-from ansible.module_utils._text import to_bytes
+from ansible.module_utils._text import to_bytes, to_text
 from ansible.module_utils import basic
 from ansible.module_utils.connection import (
     ConnectionError as AnsibleConnectionError,
@@ -28,6 +28,10 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
 from ansible_collections.community.yang.plugins.modules.get import (
     DOCUMENTATION,
 )
+from ansible_collections.community.yang.plugins.common.base import (
+    create_tmp_dir,
+    XM2JSON_DIR_PATH,
+)
 
 VALID_CONNECTION_TYPES = ["ansible.netcommon.netconf"]
 
@@ -38,12 +42,23 @@ class ActionModule(ActionBase):
         self._result = {}
 
     def _fail_json(self, msg):
-        """ Replace the AnsibleModule fai_json here
+        """ Replace the AnsibleModule fail_json here
         :param msg: The message for the failure
         :type msg: str
         """
         msg = msg.replace("(basic.py)", self._task.action)
         raise AnsibleActionFail(msg)
+
+    def _debug(self, msg):
+        """Output text using ansible's display
+
+        :param msg: The message
+        :type msg: str
+        """
+        msg = "<{phost}> [get][action] {msg}".format(
+            phost=self._playhost, msg=msg
+        )
+        self._display.vvvv(msg)
 
     def _check_argspec(self):
         """ Load the doc and convert
@@ -84,6 +99,7 @@ class ActionModule(ActionBase):
                     ", ".join(VALID_CONNECTION_TYPES),
                 ),
             }
+        self._playhost = task_vars.get("inventory_hostname")
 
         self._check_argspec()
         self._extended_check_argspec()
@@ -128,9 +144,27 @@ class ActionModule(ActionBase):
         if result.get("failed"):
             return result
 
-        # convert XML data to JSON data as per RFC 7951 format
-        tl = Translator(yang_files, search_path=search_path)
-        result["json_data"] = tl.xml_to_json(result["stdout"])
+        try:
+            tmp_dir_path = create_tmp_dir(XM2JSON_DIR_PATH)
+
+            # convert XML data to JSON data as per RFC 7951 format
+            tl = Translator(
+                yang_files, search_path=search_path, debug=self._debug
+            )
+            result["json_data"] = tl.xml_to_json(
+                result["stdout"], tmp_dir_path
+            )
+        except ValueError as exc:
+            raise AnsibleActionFail(
+                to_text(exc, errors="surrogate_then_replace")
+            )
+        except Exception as exc:
+            raise AnsibleActionFail(
+                "Unhandled exception from [action][get]. Error: {err}".format(
+                    err=to_text(exc, errors="surrogate_then_replace")
+                )
+            )
+
         result["xml_data"] = result["stdout"]
         result.pop("stdout", None)
         result.pop("stdout_lines", None)

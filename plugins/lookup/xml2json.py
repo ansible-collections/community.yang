@@ -57,46 +57,76 @@ _raw:
 """
 
 from ansible.plugins.lookup import LookupBase
-from ansible.errors import AnsibleError
+from ansible.errors import AnsibleLookupError
+from ansible.module_utils._text import to_text
 
 from ansible_collections.community.yang.plugins.module_utils.translator import (
     Translator,
 )
 
+from ansible_collections.community.yang.plugins.common.base import (
+    create_tmp_dir,
+    XM2JSON_DIR_PATH,
+)
+
 try:
     import pyang  # noqa
 except ImportError:
-    raise AnsibleError("pyang is not installed")
+    raise AnsibleLookupError("pyang is not installed")
 
 from ansible.utils.display import Display
 
 display = Display()
 
-XM2JSONL_DIR_PATH = "~/.ansible/tmp/xml2json"
-
 
 class LookupModule(LookupBase):
+    def _debug(self, msg):
+        """Output text using ansible's display
+
+        :param msg: The message
+        :type msg: str
+        """
+        msg = "[xml2json][lookup] {msg}".format(msg=msg)
+        display.vvvv(msg)
+
     def run(self, terms, variables, **kwargs):
 
         res = []
         try:
             xml_file = terms[0]
         except IndexError:
-            raise AnsibleError("path to xml file must be specified")
+            raise AnsibleLookupError("path to xml file must be specified")
 
         try:
             yang_file = kwargs["yang_file"]
         except KeyError:
-            raise AnsibleError("value of 'yang_file' must be specified")
+            raise AnsibleLookupError("value of 'yang_file' must be specified")
 
         search_path = kwargs.pop("search_path", "")
         keep_tmp_files = kwargs.pop("keep_tmp_files", False)
 
-        tl = Translator(
-            yang_file, search_path=search_path, keep_tmp_files=keep_tmp_files
-        )
+        try:
+            tmp_dir_path = create_tmp_dir(XM2JSON_DIR_PATH)
 
-        json_data = tl.xml_to_json(xml_file)
+            tl = Translator(
+                yang_file,
+                search_path=search_path,
+                keep_tmp_files=keep_tmp_files,
+                debug=self._debug,
+            )
+
+            json_data = tl.xml_to_json(xml_file, tmp_dir_path)
+        except ValueError as exc:
+            raise AnsibleLookupError(
+                to_text(exc, errors="surrogate_then_replace")
+            )
+        except Exception as exc:
+            raise AnsibleLookupError(
+                "Unhandled exception from [lookup][xml2json]. Error: {err}".format(
+                    err=to_text(exc, errors="surrogate_then_replace")
+                )
+            )
+
         res.append(json_data)
 
         return res

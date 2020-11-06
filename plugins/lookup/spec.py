@@ -184,9 +184,14 @@ RETURN = """
 """
 import os
 from ansible.plugins.lookup import LookupBase
-from ansible.errors import AnsibleError
+from ansible.errors import AnsibleLookupError
+from ansible.module_utils._text import to_text
 from ansible_collections.community.yang.plugins.module_utils.spec import (
     GenerateSpec,
+)
+from ansible_collections.community.yang.plugins.common.base import (
+    create_tmp_dir,
+    YANG_SPEC_DIR_PATH,
 )
 
 from ansible.utils.display import Display
@@ -202,18 +207,18 @@ class LookupModule(LookupBase):
         try:
             yang_file = terms[0]
         except IndexError:
-            raise AnsibleError("the yang file must be specified")
+            raise AnsibleLookupError("value of 'yang_file' must be specified")
 
         yang_file = os.path.realpath(os.path.expanduser(yang_file))
         if not os.path.isfile(yang_file):
-            raise AnsibleError("%s invalid file path" % yang_file)
+            raise AnsibleLookupError("%s invalid file path" % yang_file)
 
         search_path = kwargs.pop("search_path", "")
 
         for path in search_path.split(":"):
             path = os.path.realpath(os.path.expanduser(path))
             if path != "" and not os.path.isdir(path):
-                raise AnsibleError("%s is invalid directory path" % path)
+                raise AnsibleLookupError("%s is invalid directory path" % path)
 
         keep_tmp_files = kwargs.pop("keep_tmp_files", False)
         defaults = kwargs.pop("defaults", False)
@@ -222,27 +227,41 @@ class LookupModule(LookupBase):
 
         valid_doctype = ["config", "data"]
         if doctype not in valid_doctype:
-            raise AnsibleError(
+            raise AnsibleLookupError(
                 "doctype value %s is invalid, valid value are %s"
                 % (path, ", ".join(valid_doctype))
             )
 
-        genspec_obj = GenerateSpec(
-            yang_file_path=yang_file,
-            search_path=search_path,
-            doctype=doctype,
-            keep_tmp_files=keep_tmp_files,
-        )
-        output["json_skeleton"] = genspec_obj.generate_json_schema(
-            defaults=defaults
-        )
-        defaults = False
+        try:
+            tmp_dir_path = create_tmp_dir(YANG_SPEC_DIR_PATH)
 
-        output["xml_skeleton"] = genspec_obj.generate_xml_schema(
-            defaults=defaults, annotations=annotations
-        )
-        output["tree"] = genspec_obj.generate_tree_schema()
+            genspec_obj = GenerateSpec(
+                yang_file_path=yang_file,
+                search_path=search_path,
+                doctype=doctype,
+                keep_tmp_files=keep_tmp_files,
+                tmp_dir_path=tmp_dir_path,
+            )
+            output["json_skeleton"] = genspec_obj.generate_json_schema(
+                defaults=defaults
+            )
+            defaults = False
 
-        res.append(output)
+            output["xml_skeleton"] = genspec_obj.generate_xml_schema(
+                defaults=defaults, annotations=annotations
+            )
+            output["tree"] = genspec_obj.generate_tree_schema()
+
+            res.append(output)
+        except ValueError as exc:
+            raise AnsibleLookupError(
+                to_text(exc, errors="surrogate_then_replace")
+            )
+        except Exception as exc:
+            raise AnsibleLookupError(
+                "Unhandled exception from [lookup][spec]. Error: {err}".format(
+                    err=to_text(exc, errors="surrogate_then_replace")
+                )
+            )
 
         return res

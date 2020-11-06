@@ -55,6 +55,17 @@ class ActionModule(ActionBase):
         msg = msg.replace("(basic.py)", self._task.action)
         raise AnsibleActionFail(msg)
 
+    def _debug(self, msg):
+        """Output text using ansible's display
+
+        :param msg: The message
+        :type msg: str
+        """
+        msg = "<{phost}> [fetch][action] {msg}".format(
+            phost=self._playhost, msg=msg
+        )
+        self._display.vvvv(msg)
+
     def _check_argspec(self):
         """ Load the doc and convert
         Add the root conditionals to what was returned from the conversion
@@ -77,6 +88,7 @@ class ActionModule(ActionBase):
                     ", ".join(VALID_CONNECTION_TYPES),
                 ),
             }
+        self._playhost = task_vars.get("inventory_hostname")
 
         self._check_argspec()
         if self._result.get("failed"):
@@ -101,7 +113,19 @@ class ActionModule(ActionBase):
                 "remote netconf server does not support required capability"
                 " to fetch yang schema (urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring)."
             )
-        ss = SchemaStore(conn)
+
+        try:
+            ss = SchemaStore(conn, debug=self._debug)
+        except ValueError as exc:
+            raise AnsibleActionFail(
+                to_text(exc, errors="surrogate_then_replace")
+            )
+        except Exception as exc:
+            raise AnsibleActionFail(
+                "Unhandled exception from fetch SchemaStore. Error: {err}".format(
+                    err=to_text(exc, errors="surrogate_then_replace")
+                )
+            )
 
         result["fetched"] = dict()
         if continue_on_failure:
@@ -121,7 +145,15 @@ class ActionModule(ActionBase):
                         schema, result, continue_on_failure
                     )
         except ValueError as exc:
-            return {"failed": True, "msg": to_text(exc)}
+            raise AnsibleActionFail(
+                to_text(exc, errors="surrogate_then_replace")
+            )
+        except Exception as exc:
+            raise AnsibleActionFail(
+                "Unhandled exception from get schema description. Error: {err}".format(
+                    err=to_text(exc, errors="surrogate_then_replace")
+                )
+            )
 
         if schema:
             if dir_path:

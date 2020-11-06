@@ -9,8 +9,15 @@ __metaclass__ = type
 import optparse
 import json
 
-from pyang import plugin, error
-from collections import Sequence
+from ansible.module_utils.common._collections_compat import Sequence
+from ansible.module_utils.basic import missing_required_lib
+
+try:
+    from pyang import plugin, error
+
+    HAS_PYANG = True
+except ImportError:
+    HAS_PYANG = False
 
 
 def to_list(val):
@@ -135,4 +142,6 @@ class SampleJSONSkeletonPlugin(plugin.PyangPlugin):
 
 
 def pyang_plugin_init():
+    if not HAS_PYANG:
+        raise ImportError(missing_required_lib("pyang"))
     plugin.register_plugin(SampleJSONSkeletonPlugin())

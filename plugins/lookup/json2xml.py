@@ -65,7 +65,7 @@ import json
 
 from ansible.plugins.lookup import LookupBase
 from ansible.module_utils._text import to_text
-from ansible.errors import AnsibleError
+from ansible.errors import AnsibleLookupError
 
 from ansible_collections.community.yang.plugins.module_utils.translator import (
     Translator,
@@ -74,26 +74,40 @@ from ansible_collections.community.yang.plugins.module_utils.translator import (
 try:
     import pyang  # noqa
 except ImportError:
-    raise AnsibleError("pyang is not installed")
+    raise AnsibleLookupError("pyang is not installed")
 
 from ansible.utils.display import Display
+
+from ansible_collections.community.yang.plugins.common.base import (
+    create_tmp_dir,
+    JSON2XML_DIR_PATH,
+)
 
 display = Display()
 
 
 class LookupModule(LookupBase):
+    def _debug(self, msg):
+        """Output text using ansible's display
+
+        :param msg: The message
+        :type msg: str
+        """
+        msg = "[json2xml][lookup] {msg}".format(msg=msg)
+        display.vvvv(msg)
+
     def run(self, terms, variables, **kwargs):
 
         res = []
         try:
             json_config = terms[0]
         except IndexError:
-            raise AnsibleError("path to json file must be specified")
+            raise AnsibleLookupError("path to json file must be specified")
 
         try:
             yang_file = kwargs["yang_file"]
         except KeyError:
-            raise AnsibleError("value of 'yang_file' must be specified")
+            raise AnsibleLookupError("value of 'yang_file' must be specified")
 
         search_path = kwargs.pop("search_path", "")
         keep_tmp_files = kwargs.pop("keep_tmp_files", False)
@@ -104,16 +118,35 @@ class LookupModule(LookupBase):
             with open(json_config) as fp:
                 json.load(fp)
         except Exception as exc:
-            raise AnsibleError(
+            raise AnsibleLookupError(
                 "Failed to load json configuration: %s"
                 % (to_text(exc, errors="surrogate_or_strict"))
             )
 
-        doctype = kwargs.get("doctype", "config")
+        try:
+            tmp_dir_path = create_tmp_dir(JSON2XML_DIR_PATH)
+            doctype = kwargs.get("doctype", "config")
 
-        tl = Translator(yang_file, search_path, doctype, keep_tmp_files)
+            tl = Translator(
+                yang_file,
+                search_path,
+                doctype,
+                keep_tmp_files,
+                debug=self._debug,
+            )
 
-        xml_data = tl.json_to_xml(json_config)
+            xml_data = tl.json_to_xml(json_config, tmp_dir_path)
+        except ValueError as exc:
+            raise AnsibleLookupError(
+                to_text(exc, errors="surrogate_then_replace")
+            )
+        except Exception as exc:
+            raise AnsibleLookupError(
+                "Unhandled exception from [lookup][json2xml]. Error: {err}".format(
+                    err=to_text(exc, errors="surrogate_then_replace")
+                )
+            )
+
         res.append(xml_data)
 
         return res
