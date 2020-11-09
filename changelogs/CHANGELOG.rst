@@ -5,6 +5,22 @@ Ansible Netcommon Collection Release Notes
 .. contents:: Topics
 
 
+v1.0.1
+======
+
+Minor Changes
+-------------
+
+- Added unit test for xml2json, json2xml and spec lookup plugins (https://github.com/ansible-collections/community.yang/pull/50)
+- Refactored module_utils to fix ansible-test sanity issues (https://github.com/ansible-collections/community.yang/pull/50)
+- added optional attribute for fetch action to continue if it hits a module that cannot be found
+
+Bugfixes
+--------
+
+- Fixed json2xml py3 compatibility issues (https://github.com/ansible-collections/community.yang/pull/45)
+- Sort yang_files to address dependency issue (https://github.com/ansible-collections/community.yang/pull/46)
+
 v1.0.0
 ======
 

@@ -44,3 +44,20 @@ releases:
     - 8_get.yaml
     - yang_configure_module.yaml
     release_date: '2020-10-01'
+  1.0.1:
+    changes:
+      bugfixes:
+      - Fixed json2xml py3 compatibility issues (https://github.com/ansible-collections/community.yang/pull/45)
+      - Sort yang_files to address dependency issue (https://github.com/ansible-collections/community.yang/pull/46)
+      minor_changes:
+      - Added unit test for xml2json, json2xml and spec lookup plugins (https://github.com/ansible-collections/community.yang/pull/50)
+      - Refactored module_utils to fix ansible-test sanity issues (https://github.com/ansible-collections/community.yang/pull/50)
+      - added optional attribute for fetch action to continue if it hits a module
+        that cannot be found
+    fragments:
+    - 40_continue_on_failure.yaml
+    - 45_json2xml_py3.yaml
+    - 46_sort_yang_files.yaml
+    - add_unit_tests.yaml
+    - module_utils_refactor.yaml
+    release_date: '2020-11-09'

@@ -1,3 +1,0 @@
----
-minor_changes:
-  - added optional attribute for fetch action to continue if it hits a module that cannot be found

@@ -1,3 +1,0 @@
----
-bugfixes:
-  - Sort yang_files to address dependency issue (https://github.com/ansible-collections/community.yang/pull/46)
