@@ -1,3 +1,0 @@
----
-minor_changes:
-  - Added unit test for xml2json, json2xml and spec lookup plugins (https://github.com/ansible-collections/community.yang/pull/50)

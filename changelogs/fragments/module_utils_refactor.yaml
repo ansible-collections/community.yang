@@ -1,3 +1,0 @@
----
-minor_changes:
-  - Refactored module_utils to fix ansible-test sanity issues (https://github.com/ansible-collections/community.yang/pull/50)
