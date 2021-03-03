@@ -14,7 +14,8 @@ short_description: Converts xml input to json structure output by mapping it aga
 description:
   - This plugin lookups the input xml data, typically Netconf rpc response received from remote host
     and convert it to json format as defined by RFC 7951 JSON Encoding of Data Modeled with YANG
-requirements: pyang
+requirements:
+  - pyang
 options:
   _terms:
     description:
