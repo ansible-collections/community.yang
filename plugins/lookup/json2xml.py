@@ -103,8 +103,11 @@ class LookupModule(LookupBase):
     def run(self, terms, variables, **kwargs):
         if PYANG_IMPORT_ERROR:
             raise_from(
-                AnsibleLookupError('pyang must be installed to use this plugin'),
-                PYANG_IMPORT_ERROR)
+                AnsibleLookupError(
+                    "pyang must be installed to use this plugin"
+                ),
+                PYANG_IMPORT_ERROR,
+            )
 
         res = []
         try:
