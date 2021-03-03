@@ -15,6 +15,8 @@ description:
   - This plugin lookups the input json configuration, validates it against the respective yang data
     model which is also given as input to this plugin and coverts it to xml format which can be used
     as payload within Netconf rpc.
+requirements:
+  - pyang
 options:
   _terms:
     description:
@@ -64,6 +66,7 @@ import os
 import json
 
 from ansible.plugins.lookup import LookupBase
+from ansible.module_utils.six import raise_from
 from ansible.module_utils._text import to_text
 from ansible.errors import AnsibleLookupError
 
@@ -73,8 +76,11 @@ from ansible_collections.community.yang.plugins.module_utils.translator import (
 
 try:
     import pyang  # noqa
-except ImportError:
-    raise AnsibleLookupError("pyang is not installed")
+except ImportError as imp_exc:
+    PYANG_IMPORT_ERROR = imp_exc
+else:
+    PYANG_IMPORT_ERROR = None
+
 
 from ansible.utils.display import Display
 
@@ -97,6 +103,10 @@ class LookupModule(LookupBase):
         display.vvvv(msg)
 
     def run(self, terms, variables, **kwargs):
+        if PYANG_IMPORT_ERROR:
+            raise_from(
+                AnsibleLookupError('pyang must be installed to use this plugin'),
+                PYANG_IMPORT_ERROR)
 
         res = []
         try:
