@@ -15,8 +15,6 @@ description:
   - This plugin lookups the input json configuration, validates it against the respective yang data
     model which is also given as input to this plugin and coverts it to xml format which can be used
     as payload within Netconf rpc.
-requirements:
-  - pyang
 options:
   _terms:
     description:
