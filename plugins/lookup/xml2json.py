@@ -58,6 +58,7 @@ _raw:
 
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleLookupError
+from ansible.module_utils.six import raise_from
 from ansible.module_utils._text import to_text
 
 from ansible_collections.community.yang.plugins.module_utils.translator import (
@@ -71,8 +72,10 @@ from ansible_collections.community.yang.plugins.common.base import (
 
 try:
     import pyang  # noqa
-except ImportError:
-    raise AnsibleLookupError("pyang is not installed")
+except ImportError as imp_exc:
+    PYANG_IMPORT_ERROR = imp_exc
+else:
+    PYANG_IMPORT_ERROR = None
 
 from ansible.utils.display import Display
 
@@ -90,6 +93,13 @@ class LookupModule(LookupBase):
         display.vvvv(msg)
 
     def run(self, terms, variables, **kwargs):
+        if PYANG_IMPORT_ERROR:
+            raise_from(
+                AnsibleLookupError(
+                    "pyang must be installed to use this plugin"
+                ),
+                PYANG_IMPORT_ERROR,
+            )
 
         res = []
         try:
