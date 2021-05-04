@@ -46,6 +46,12 @@ options:
         the default directory path.
     type: path
     default: "~/.ansible/yang/spec"
+  netconf_config_args:
+    description:
+    - Pass arguments to the lower level component that this module uses, for supported arguments see
+      M(ansible.netcommon.netconf_config) documentation. Note that C(netconf_config) C(content) is always
+      overwritten and C(get_filter) of C(netconf_config) takes precedence over C(get_filter) of this module.
+    type: dict
 requirements:
 - ncclient (>=v0.5.2)
 - pyang
@@ -102,4 +108,14 @@ EXAMPLES = """
     config: "{{ candidate['json_data'] }}"
     file: "{{ yang_file }}"
     search_path: "{{ search_path }}"
+
+- name: pass arguments to netconf_config
+  community.yang.configure:
+    config: "{{ lookup('file', 'interfaces-config.json') }}"
+    file: "{{ playbook_dir }}/public/release/models/interfaces/openconfig-interfaces.yang"
+    search_path: "{{ playbook_dir }}/public/release/models"
+    netconf_config_args:
+      lock: never
+      username: system
+      password: complex_password
 """
