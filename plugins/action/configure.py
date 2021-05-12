@@ -77,6 +77,7 @@ class ActionModule(ActionBase):
         and instantiate an AnsibleModule to validate
         """
         argspec = generate_argspec()
+
         basic._ANSIBLE_ARGS = to_bytes(
             json.dumps({"ANSIBLE_MODULE_ARGS": self._task.args})
         )
@@ -172,8 +173,13 @@ class ActionModule(ActionBase):
             )
         else:
             new_module_args = self._task.args.copy()
+            if "netconf_options" in self._task.args:
+                new_module_args.update(
+                    self._task.args["netconf_options"].copy()
+                )
             new_module_args["content"] = xml_data
-            for item in ["file", "search_path", "config"]:
+
+            for item in ["file", "search_path", "config", "netconf_options"]:
                 new_module_args.pop(item, None)
 
             self._display.vvvv(
