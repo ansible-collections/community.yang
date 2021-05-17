@@ -116,7 +116,7 @@ Parameters
 Examples
 --------
 
-.. code-block:: yaml+jinja
+.. code-block:: yaml
 
     - name: translate json to xml
       debug: msg="{{ lookup('community.yang.xml2json', interfaces_config.xml,

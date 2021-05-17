@@ -145,7 +145,7 @@ Notes
 Examples
 --------
 
-.. code-block:: yaml+jinja
+.. code-block:: yaml
 
     - name: fetch interface configuration and return it in JSON format
       community.yang.get:
