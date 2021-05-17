@@ -159,7 +159,7 @@ Parameters
 Examples
 --------
 
-.. code-block:: yaml+jinja
+.. code-block:: yaml
 
     - name: Get interface yang config spec without defaults
       set_fact:

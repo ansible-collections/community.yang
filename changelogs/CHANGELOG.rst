@@ -5,6 +5,14 @@ Ansible Netcommon Collection Release Notes
 .. contents:: Topics
 
 
+v1.1.0
+======
+
+Minor Changes
+-------------
+
+- community.yang.configure - Since ``configure`` module is built on top of ``netconf_config`` we add a new option argument, ``netconf_options``, allowing passing options directly to ``netconf_config``.
+
 v1.0.1
 ======
 

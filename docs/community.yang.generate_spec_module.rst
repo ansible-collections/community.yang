@@ -277,7 +277,7 @@ Notes
 Examples
 --------
 
-.. code-block:: yaml+jinja
+.. code-block:: yaml
 
     - name: generate spec from openconfig interface data and in result
       community.yang.generate_spec:
