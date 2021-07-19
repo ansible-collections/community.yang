@@ -4,6 +4,13 @@ Ansible Netcommon Collection Release Notes
 
 .. contents:: Topics
 
+v1.1.1
+======
+
+Minor Changes
+-------------
+
+- fetch all versions of a schemas
 
 v1.1.0
 ======

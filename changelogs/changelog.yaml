@@ -72,3 +72,8 @@ releases:
     - 58-add_netconf_options.yml
     - fix-sanity-ansible-doc.yaml
     release_date: '2021-05-17'
+  1.1.1:
+    changes:
+      minor_changes:
+      - update fetch to pull each version of a schema definition
+    release_date: '2021-xx-xx'

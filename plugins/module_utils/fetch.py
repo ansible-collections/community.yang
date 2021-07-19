@@ -80,11 +80,12 @@ class SchemaStore(object):
         schema_cache_entry = {}
         for index, schema_list in enumerate(self._all_schema_list):
             if schema_id == schema_list["identifier"]:
+                version = schema_list["version"]
                 found = True
                 break
 
         if schema_id in self._all_schema_identifier_list:
-            content = "<identifier>%s</identifier>" % schema_id
+            content = "<identifier>%s</identifier><version>%s</version>" % (schema_id, version)
             xmlns = "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring"
             xml_request = '<%s xmlns="%s"> %s </%s>' % (
                 "get-schema",
