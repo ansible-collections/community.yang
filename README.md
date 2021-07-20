@@ -168,6 +168,10 @@ After the version is published, verify it exists on the [Ansible Yang Community 
 
 We welcome community contributions to this collection. If you find problems, please open an issue or create a PR against the [Ansible Yang collection repository](https://github.com/ansible-collections/community.yang).
 
+1. Make changes
+2. Detail changes in a [fragment](changelogs/fragments). [example](https://github.com/ansible-collections/community.yang/pull/58/files)
+3. Submit PR
+
 You can also join us on:
 
 - IRC - the ``#ansible-network`` [libera.chat](https://libera.chat/) channel
@@ -177,7 +181,8 @@ See the [Ansible Community Guide](https://docs.ansible.com/ansible/latest/commun
 
 
 ## Changelogs
-<!--Add a link to a changelog.md file or an external docsite to cover this information. -->
+
+[Change log](changelogs/CHANGELOG.rst)
 
 ## Roadmap
 
