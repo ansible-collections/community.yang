@@ -1,0 +1,3 @@
+---
+minor_changes:
+  - remove description block from yang before matching imports to prevent false positives from examples and ensure only non-whitespace characters are matched
