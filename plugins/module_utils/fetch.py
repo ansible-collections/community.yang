@@ -128,8 +128,9 @@ class SchemaStore(object):
 
         if found:
             result["fetched"][schema_id] = data_model
-            importre = re.compile(r"import (.+) {")
-            all_found = importre.findall(data_model)
+            importre = re.compile(r"import (\S+) {")
+            all_found = re.sub(r"description\s+\"[^\"]+\";", "", data_model)
+            all_found = importre.findall(all_found)
             all_found = [re.sub("['\"]", "", imp) for imp in all_found]
 
             return all_found
