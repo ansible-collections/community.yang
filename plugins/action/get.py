@@ -109,6 +109,7 @@ class ActionModule(ActionBase):
 
         yang_files = self._task.args.get("file", [])
         search_path = self._task.args.get("search_path")
+        ignore_errors = self._task.args.get("ignore_errors", False)
 
         if not (
             hasattr(self._connection, "socket_path")
@@ -126,7 +127,7 @@ class ActionModule(ActionBase):
             )
         else:
             new_module_args = self._task.args.copy()
-            for item in ["file", "search_path"]:
+            for item in ["file", "search_path", "ignore_errors"]:
                 new_module_args.pop(item, None)
 
             self._display.vvvv(
@@ -149,7 +150,7 @@ class ActionModule(ActionBase):
 
             # convert XML data to JSON data as per RFC 7951 format
             tl = Translator(
-                yang_files, search_path=search_path, debug=self._debug
+                yang_files, search_path=search_path, ignore_errors=ignore_errors, debug=self._debug
             )
             result["json_data"] = tl.xml_to_json(
                 result["stdout"], tmp_dir_path

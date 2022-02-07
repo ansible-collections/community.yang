@@ -67,6 +67,12 @@ options:
         the default directory path.
     type: path
     default: "~/.ansible/yang/spec"
+  ignore_errors:
+    description:
+      - This is an optional arguement that will ignore any errors produced by pyang when converting yang
+        to other formats
+    type: bool
+    default: false
 requirements:
 - ncclient (>=v0.5.2)
 - pyang
@@ -121,4 +127,12 @@ EXAMPLES = """
         </interface-configuration></interface-configurations>
     file: "{{ playbook_dir }}/YangModels/yang/tree/master/vendor/cisco/xr/613/*.yang"
     search_path: "{{ playbook_dir }}/YangModels/yang/tree/master/vendor/cisco/xr/613:{{ playbook_dir }}/pyang/modules"
+- name: fetch interface configuration and return it in JSON format ignore any errors from pyang
+  community.yang.get:
+    filter: |
+        <interface-configurations xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-ifmgr-cfg"><interface-configuration>
+        </interface-configuration></interface-configurations>
+    file: "{{ playbook_dir }}/YangModels/yang/tree/master/vendor/cisco/xr/613/*.yang"
+    search_path: "{{ playbook_dir }}/YangModels/yang/tree/master/vendor/cisco/xr/613:{{ playbook_dir }}/pyang/modules"
+    ignore_errors: true
 """
