@@ -1,5 +1,7 @@
 # Ansible Collection - community.yang
 
+**This repository has been archived. Refer to the [ansible.yang collection repository](https://github.com/ansible-collections/ansible.yang) instead.**.
+
 This repo hosts the `community.yang` Ansible Collection.
 
 The collection includes the community plugins to help the support Yang manily with network devices.
