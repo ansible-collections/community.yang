@@ -28,6 +28,9 @@ jobs:
         with:
           ansible-core-version: stable-2.12
           testing-type: sanity
+          test-deps: >-
+            ansible.netcommon
+            ansible.utils
       - name: Install tox
         run: pip install tox
       - name: Run tox on python version from matrix
