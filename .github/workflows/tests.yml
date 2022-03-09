@@ -31,6 +31,14 @@ jobs:
           test-deps: >-
             ansible.netcommon
             ansible.utils
+      - name: Perform Unit testing with ansible-test
+        uses: ansible-community/ansible-test-gh-action@release/v1
+        with:
+          ansible-core-version: stable-2.12
+          testing-type: units
+          test-deps: >-
+            ansible.netcommon
+            ansible.utils
       - name: Install tox
         run: pip install tox
       - name: Run tox on python version from matrix
