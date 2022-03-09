@@ -29,6 +29,16 @@ labels:
   'bug':
     include:
       - '\bbug[s]?\b'
+
+  'dnm':
+    include:
+      - '\bdnm\b'
+      - '\bDNM\b'
+      - '\bnot merge\b'
+  'bug':
+    include:
+      - '\bbug[s]?\b'
+      - '\bnot working\b'
     exclude: []
   'help wanted':
     include:
