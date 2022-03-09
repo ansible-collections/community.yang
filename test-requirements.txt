@@ -1,10 +1,12 @@
 ncclient
 pyang
 xmltodict
+flake8==3.9.2
 ansible-test==1.0.1
 black==19.3b0 ; python_version > '3.5'
 coverage==4.5.4
-flake8
 mock ; python_version < '3.5'
 pytest-xdist
 yamllint
+mypy==0.910
+tox==3.24.3
