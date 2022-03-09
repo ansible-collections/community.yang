@@ -1,7 +1,7 @@
 ncclient
 pyang
 xmltodict
-ansible-test=1.0.1
+ansible-test==1.0.1
 black==19.3b0 ; python_version > '3.5'
 coverage==4.5.4
 flake8
