@@ -26,9 +26,15 @@ comments:
 #    - 'include' patterns will associate a label if any of these patterns match
 #    - 'exclude' patterns will ignore this label if any of these patterns match
 labels:
+  'dnm':
+    include:
+      - '\bdnm\b'
+      - '\bDNM\b'
+      - '\bnot merge\b'
   'bug':
     include:
       - '\bbug[s]?\b'
+      - '\bnot working\b'
     exclude: []
   'help wanted':
     include:
