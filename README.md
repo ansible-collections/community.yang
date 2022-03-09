@@ -1,4 +1,4 @@
-# Ansible Collection - community.yang
+# Ansible Collection - community.yang  ![Tests](https://github.com/codeandcosmos/community.yang/actions/workflows/tests.yml/badge.svg)
 
 This repo hosts the `community.yang` Ansible Collection.
 
