@@ -1,5 +1,4 @@
 ncclient
-ansible-test
 pyang
 xmltodict
 black==19.3b0 ; python_version > '3.5'
