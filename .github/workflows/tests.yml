@@ -21,7 +21,7 @@ jobs:
       - name: Install ansible-test
         run: |
           python -m pip install --upgrade pip
-          pip install ansible-test
+          pip install ansible-test==1.0.1
       - name: Install tox
         run: pip install tox
       - name: Run tox on python version from matrix
