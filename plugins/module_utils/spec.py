@@ -18,7 +18,7 @@ import uuid
 
 from copy import deepcopy
 
-# from ansible.module_utils.basic import missing_required_lib
+from ansible.module_utils.basic import missing_required_lib
 from ansible.module_utils.six import StringIO
 
 from ansible_collections.community.yang.plugins.module_utils.common import (
@@ -27,12 +27,12 @@ from ansible_collections.community.yang.plugins.module_utils.common import (
 )
 
 
-# try:
-#     from pyang import error  # noqa: F401
+try:
+    from pyang import error  # noqa: F401
 
-#     HAS_PYANG = True
-# except ImportError:
-#     HAS_PYANG = False
+    HAS_PYANG = True
+except ImportError:
+    HAS_PYANG = False
 
 YANG_SPEC_DIR_PATH = "~/.ansible/tmp/yang/spec"
 
@@ -47,8 +47,8 @@ class GenerateSpec(object):
         keep_tmp_files=False,
         tmp_dir_path=YANG_SPEC_DIR_PATH,
     ):
-        # if not HAS_PYANG:
-        #     raise ImportError(missing_required_lib("pyang"))
+        if not HAS_PYANG:
+            raise ImportError(missing_required_lib("pyang"))
 
         yang_file_path = to_list(yang_file_path) if yang_file_path else []
         self._yang_file_path = []

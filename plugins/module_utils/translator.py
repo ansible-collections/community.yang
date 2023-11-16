@@ -30,12 +30,12 @@ from ansible_collections.community.yang.plugins.module_utils.common import (
 )
 
 
-# try:
-#     import pyang  # noqa
+try:
+    import pyang  # noqa
 
-#     HAS_PYANG = True
-# except ImportError:
-#     HAS_PYANG = False
+    HAS_PYANG = True
+except ImportError:
+    HAS_PYANG = False
 
 try:
     from lxml import etree
@@ -100,8 +100,8 @@ class Translator(object):
         self._search_path = abs_search_path
 
     def _set_pyang_executables(self):
-        # if not HAS_PYANG:
-        #     raise ValueError(missing_required_lib("pyang"))
+        if not HAS_PYANG:
+            raise ValueError(missing_required_lib("pyang"))
         if not HAS_LXML:
             raise ValueError(missing_required_lib("lxml"))
         base_pyang_path = sys.modules["pyang"].__file__

@@ -74,30 +74,32 @@ class TestValidate(unittest.TestCase):
         result = self._lp.run(terms, variables, **kwargs)
         # check json_skeleton data
         self.assertEqual(
-            result[0]["json_skeleton"]["openconfig-interfaces:interfaces"]["interface"][0]["name"],
+            result[0]["json_skeleton"]["openconfig-interfaces:interfaces"]["interface"][
+                0
+            ]["name"],
             "",
         )
         self.assertEqual(
-            result[0]["json_skeleton"]["openconfig-interfaces:interfaces"]["interface"][0][
-                "config"
-            ]["loopback-mode"],
+            result[0]["json_skeleton"]["openconfig-interfaces:interfaces"]["interface"][
+                0
+            ]["config"]["loopback-mode"],
             "False",
         )
         self.assertEqual(
-            result[0]["json_skeleton"]["openconfig-interfaces:interfaces"]["interface"][0][
-                "config"
-            ]["enabled"],
+            result[0]["json_skeleton"]["openconfig-interfaces:interfaces"]["interface"][
+                0
+            ]["config"]["enabled"],
             "True",
         )
 
         # check xml skeleton data
         self.assertIn(
-            "<interface>\n      <!-- # keys: name-->\n      <!-- # entries: 0.. -->\n",
+            """<?xml version=\'1.0\' encoding=\'UTF-8\'?>\n<config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">\n  <interfaces xmlns="http://openconfig.net/yang/interfaces">\n    <interface>\n      <!-- # keys: name-->\n      <!-- # entries: 0.. -->\n      <name>\n        <!-- type: leafref -->\n      </name>\n      <config>\n        <name>\n          <!-- type: string -->\n        </name>\n        <type>\n          <!-- type: identityref -->\n        </type>\n        <mtu>\n          <!-- type: uint16 -->\n        </mtu>\n        <description>\n          <!-- type: string -->\n        </description>\n      </config>\n      <hold-time>\n        <config/>\n      </hold-time>\n      <subinterfaces>\n        <subinterface>\n          <!-- # keys: index-->\n          <!-- # entries: 0.. -->\n          <index>\n            <!-- type: leafref -->\n          </index>\n          <config>\n            <description>\n              <!-- type: string -->\n            </description>\n          </config>\n        </subinterface>\n      </subinterfaces>\n    </interface>\n  </interfaces>\n</config>\n""",
             result[0]["xml_skeleton"],
         )
 
         # check tree skeleton data
         self.assertIn(
-            "module: openconfig-interfaces\n  +--rw interfaces\n     +--rw interface* [name]\n",
+            """module: openconfig-interfaces\n  +--rw interfaces\n     +--rw interface* [name]\n        +--rw name             -> ../config/name\n        +--rw config\n        |  +--rw name?            string\n        |  +--rw type             identityref\n        |  +--rw mtu?             uint16\n        |  +--rw loopback-mode?   boolean\n        |  +--rw description?     string\n        |  +--rw enabled?         boolean\n        +--ro state\n        |  +--ro name?            string\n        |  +--ro type             identityref\n        |  +--ro mtu?             uint16\n        |  +--ro loopback-mode?   boolean\n        |  +--ro description?     string\n        |  +--ro enabled?         boolean\n        |  +--ro ifindex?         uint32\n        |  +--ro admin-status     enumeration\n        |  +--ro oper-status      enumeration\n        |  +--ro last-change?     oc-types:timeticks64\n        |  +--ro counters\n        |     +--ro in-octets?             oc-yang:counter64\n        |     +--ro in-unicast-pkts?       oc-yang:counter64\n        |     +--ro in-broadcast-pkts?     oc-yang:counter64\n        |     +--ro in-multicast-pkts?     oc-yang:counter64\n        |     +--ro in-discards?           oc-yang:counter64\n        |     +--ro in-errors?             oc-yang:counter64\n        |     +--ro in-unknown-protos?     oc-yang:counter64\n        |     +--ro in-fcs-errors?         oc-yang:counter64\n        |     +--ro out-octets?            oc-yang:counter64\n        |     +--ro out-unicast-pkts?      oc-yang:counter64\n        |     +--ro out-broadcast-pkts?    oc-yang:counter64\n        |     +--ro out-multicast-pkts?    oc-yang:counter64\n        |     +--ro out-discards?          oc-yang:counter64\n        |     +--ro out-errors?            oc-yang:counter64\n        |     +--ro carrier-transitions?   oc-yang:counter64\n        |     +--ro last-clear?            oc-types:timeticks64\n        +--rw hold-time\n        |  +--rw config\n        |  |  +--rw up?     uint32\n        |  |  +--rw down?   uint32\n        |  +--ro state\n        |     +--ro up?     uint32\n        |     +--ro down?   uint32\n        +--rw subinterfaces\n           +--rw subinterface* [index]\n              +--rw index     -> ../config/index\n              +--rw config\n              |  +--rw index?         uint32\n              |  +--rw description?   string\n              |  +--rw enabled?       boolean\n              +--ro state\n                 +--ro index?          uint32\n                 +--ro description?    string\n                 +--ro enabled?        boolean\n                 +--ro name?           string\n                 +--ro ifindex?        uint32\n                 +--ro admin-status    enumeration\n                 +--ro oper-status     enumeration\n                 +--ro last-change?    oc-types:timeticks64\n                 +--ro counters\n                    +--ro in-octets?             oc-yang:counter64\n                    +--ro in-unicast-pkts?       oc-yang:counter64\n                    +--ro in-broadcast-pkts?     oc-yang:counter64\n                    +--ro in-multicast-pkts?     oc-yang:counter64\n                    +--ro in-discards?           oc-yang:counter64\n                    +--ro in-errors?             oc-yang:counter64\n                    +--ro in-unknown-protos?     oc-yang:counter64\n                    +--ro in-fcs-errors?         oc-yang:counter64\n                    +--ro out-octets?            oc-yang:counter64\n                    +--ro out-unicast-pkts?      oc-yang:counter64\n                    +--ro out-broadcast-pkts?    oc-yang:counter64\n                    +--ro out-multicast-pkts?    oc-yang:counter64\n                    +--ro out-discards?          oc-yang:counter64\n                    +--ro out-errors?            oc-yang:counter64\n                    +--ro carrier-transitions?   oc-yang:counter64\n                    +--ro last-clear?            oc-types:timeticks64\n'""",
             result[0]["tree"],
         )
