@@ -61,7 +61,8 @@ _raw:
 
 from ansible.errors import AnsibleLookupError
 from ansible.module_utils._text import to_text
-from ansible.module_utils.six import raise_from
+
+# from ansible.module_utils.six import raise_from
 from ansible.plugins.lookup import LookupBase
 
 from ansible_collections.community.yang.plugins.common.base import (
