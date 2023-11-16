@@ -10,178 +10,183 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 DOCUMENTATION = """
-    lookup: spec
-    author: Ganesh Nalawade (@ganeshrn)
-    short_description:  This plugin reads the content of given yang document and generates json and xml
-                        configuration skeleton and a tree structure of yang document.
+name: spec
+author: Ganesh Nalawade (@ganeshrn)
+short_description:
+  This plugin reads the content of given yang document and generates json and xml
+  configuration skeleton and a tree structure of yang document.
+description:
+  - This plugin parses yang document and generates json and xml configuration skeleton and a tree
+    structure of yang document. The tree structure document is as per RFC 8340 which helps to consume
+    the yang document along with json and xml configuration skeleton.
+options:
+  _terms:
     description:
-      - This plugin parses yang document and generates json and xml configuration skeleton and a tree
-        structure of yang document. The tree structure document is as per RFC 8340 which helps to consume
-        the yang document along with json and xml configuration skeleton.
-    options:
-      _terms:
-        description: The path points to the location of the top level yang module which
-                      is to be transformed into to Ansible spec.
-        required: True
-        type: str
-      search_path:
-        description:
-          - is a colon C(:) separated list of directories to search for imported yang modules
-            in the yang file mentioned in C(path) option. If the value is not given it will search in
-            the same directory as that of C(yang_file).
-        type: path
-      defaults:
-        description:
-          - This boolean flag indicates if the generated json and xml configuration schema should have
-            fields initialized with default values or not.
-        default: False
-      doctype:
-        description:
-          - Identifies the root node of the configuration skeleton. If value is C(config) only configuration
-            data will be present in skeleton, if value is C(data) both config and state data fields will be present
-            in output.
-        default: config
-        choices: ['config', 'data']
-        type: bool
-      annotations:
-        description:
-          - The boolean flag identifies if the xml skeleton should have comments describing the field or not.
-        default: False
-        type: bool
-      keep_tmp_files:
-        description:
-          - This is a boolean flag to indicate if the intermediate files generated while creating spec
-            should be kept or deleted. If the value is C(true) the files will not be deleted else by
-            default all the intermediate files will be deleted irrespective of whether task run is
-            successful or not. The intermediate files are stored in path C(~/.ansible/tmp/yang/spec), this
-            option is mainly used for debugging purpose.
-        default: False
-        type: bool
+      The path points to the location of the top level yang module which
+      is to be transformed into to Ansible spec.
+    required: true
+    type: str
+  search_path:
+    description:
+      - is a colon C(:) separated list of directories to search for imported yang modules
+        in the yang file mentioned in C(path) option. If the value is not given it will search in
+        the same directory as that of C(yang_file).
+    type: path
+  defaults:
+    description:
+      - This boolean flag indicates if the generated json and xml configuration schema should have
+        fields initialized with default values or not.
+    default: false
+  doctype:
+    description:
+      - Identifies the root node of the configuration skeleton. If value is C(config) only configuration
+        data will be present in skeleton, if value is C(data) both config and state data fields will be present
+        in output.
+    default: config
+    choices: ["config", "data"]
+    type: bool
+  annotations:
+    description:
+      - The boolean flag identifies if the xml skeleton should have comments describing the field or not.
+    default: false
+    type: bool
+  keep_tmp_files:
+    description:
+      - This is a boolean flag to indicate if the intermediate files generated while creating spec
+        should be kept or deleted. If the value is C(true) the files will not be deleted else by
+        default all the intermediate files will be deleted irrespective of whether task run is
+        successful or not. The intermediate files are stored in path C(~/.ansible/tmp/yang/spec), this
+        option is mainly used for debugging purpose.
+    default: false
+    type: bool
+
 """
 
 EXAMPLES = """
 - name: Get interface yang config spec without defaults
   set_fact:
-    interfaces_spec: "{{ lookup('community.yang.spec', 'openconfig/public/release/models/interfaces/openconfig-interfaces.yang',
-                            search_path='openconfig/public/release/models:pyang/modules/', defaults=True,
-                            doctype='data') }}"
+    interfaces_spec:
+      "{{ lookup('community.yang.spec', 'openconfig/public/release/models/interfaces/openconfig-interfaces.yang',
+      search_path='openconfig/public/release/models:pyang/modules/', defaults=True,
+      doctype='data') }}"
 
 - name: Get interface yang spec with defaults and state data
   set_fact:
-    interfaces_spec: "{{ lookup('community.yang.spec', 'openconfig/public/release/models/interfaces/openconfig-interfaces.yang',
-                            search_path='openconfig/public/release/models:pyang/modules/', defaults=True,
-                            doctype='data') }}"
+    interfaces_spec:
+      "{{ lookup('community.yang.spec', 'openconfig/public/release/models/interfaces/openconfig-interfaces.yang',
+      search_path='openconfig/public/release/models:pyang/modules/', defaults=True,
+      doctype='data') }}"
 """
 
 RETURN = """
-  _list:
-    description:
-      - It returns json skeleton configuration schema, xml skeleton schema and tree structure (as per RFC 8340)
-        for given yang schema.
-    type: complex
-    contains:
-      tree:
-        description: The tree representation of yang scehma as per RFC 8340
-        returned: success
-        type: dict
-        sample: |
-            module: openconfig-interfaces
-              +--rw interfaces
-                 +--rw interface* [name]
-                    +--rw name             -> ../config/name
-                    +--rw config
-                    |  +--rw name?            string
-                    |  +--rw type             identityref
-                    |  +--rw mtu?             uint16
-                    |  +--rw loopback-mode?   boolean
-                    |  +--rw description?     string
-                    |  +--rw enabled?         boolean
-                    +--ro state
-                    |  +--ro name?            string
-                    |  +--ro type             identityref
-                    |  +--ro mtu?             uint16
-                    |  +--ro loopback-mode?   boolean
-                    |  +--ro description?     string
-                    |  +--ro enabled?         boolean
-                    |  +--ro ifindex?         uint32
-                    |  +--ro admin-status     enumeration
-                    |  +--ro oper-status      enumeration
-                    |  +--ro last-change?     oc-types:timeticks64
-      json_skeleton:
-        description: The json configuration skeleton generated from yang document
-        returned: success
-        type: dict
-        sample: |
-            {
-                "openconfig-interfaces:interfaces": {
-                    "interface": [
-                        {
-                            "hold-time": {
-                                "config": {
-                                    "down": "",
-                                    "up": ""
-                                }
-                            },
+_list:
+  description:
+    - It returns json skeleton configuration schema, xml skeleton schema and tree structure (as per RFC 8340)
+      for given yang schema.
+  type: raw
+  contains:
+    tree:
+      description: The tree representation of yang scehma as per RFC 8340
+      returned: success
+      type: dict
+      sample: |
+        module: openconfig-interfaces
+          +--rw interfaces
+             +--rw interface* [name]
+                +--rw name             -> ../config/name
+                +--rw config
+                |  +--rw name?            string
+                |  +--rw type             identityref
+                |  +--rw mtu?             uint16
+                |  +--rw loopback-mode?   boolean
+                |  +--rw description?     string
+                |  +--rw enabled?         boolean
+                +--ro state
+                |  +--ro name?            string
+                |  +--ro type             identityref
+                |  +--ro mtu?             uint16
+                |  +--ro loopback-mode?   boolean
+                |  +--ro description?     string
+                |  +--ro enabled?         boolean
+                |  +--ro ifindex?         uint32
+                |  +--ro admin-status     enumeration
+                |  +--ro oper-status      enumeration
+                |  +--ro last-change?     oc-types:timeticks64
+    json_skeleton:
+      description: The json configuration skeleton generated from yang document
+      returned: success
+      type: dict
+      sample: |
+        {
+            "openconfig-interfaces:interfaces": {
+                "interface": [
+                    {
+                        "hold-time": {
                             "config": {
-                                "description": "",
-                                "type": "",
-                                "enabled": "",
-                                "mtu": "",
-                                "loopback-mode": "",
-                                "name": ""
-                            },
-                            "name": "",
-                            "subinterfaces": {
-                                "subinterface": [
-                                    {
-                                        "index": "",
-                                        "config": {
-                                            "index": "",
-                                            "enabled": "",
-                                            "description": ""
-                                        }
-                                    }
-                                ]
+                                "down": "",
+                                "up": ""
                             }
+                        },
+                        "config": {
+                            "description": "",
+                            "type": "",
+                            "enabled": "",
+                            "mtu": "",
+                            "loopback-mode": "",
+                            "name": ""
+                        },
+                        "name": "",
+                        "subinterfaces": {
+                            "subinterface": [
+                                {
+                                    "index": "",
+                                    "config": {
+                                        "index": "",
+                                        "enabled": "",
+                                        "description": ""
+                                    }
+                                }
+                            ]
                         }
-                    ]
-                }
-      xml_skeleton:
-        description: The xml configuration skeleton generated from yang document
-        returned: success
-        type: dict
-        sample: |
-            <config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-              <interfaces xmlns="http://openconfig.net/yang/interfaces">
-                <interface>
-                  <name/>
+                    }
+                ]
+            }
+    xml_skeleton:
+      description: The xml configuration skeleton generated from yang document
+      returned: success
+      type: dict
+      sample: |
+        <config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+          <interfaces xmlns="http://openconfig.net/yang/interfaces">
+            <interface>
+              <name/>
+              <config>
+                <name/>
+                <type/>
+                <mtu/>
+                <loopback-mode></loopback-mode>
+                <description/>
+                <enabled>True</enabled>
+              </config>
+              <hold-time>
+                <config>
+                  <up></up>
+                  <down></down>
+                </config>
+              </hold-time>
+              <subinterfaces>
+                <subinterface>
+                  <index/>
                   <config>
-                    <name/>
-                    <type/>
-                    <mtu/>
-                    <loopback-mode></loopback-mode>
+                    <index></index>
                     <description/>
-                    <enabled>True</enabled>
+                    <enabled></enabled>
                   </config>
-                  <hold-time>
-                    <config>
-                      <up></up>
-                      <down></down>
-                    </config>
-                  </hold-time>
-                  <subinterfaces>
-                    <subinterface>
-                      <index/>
-                      <config>
-                        <index></index>
-                        <description/>
-                        <enabled></enabled>
-                      </config>
-                    </subinterface>
-                  </subinterfaces>
-                </interface>
-              </interfaces>
-            </config>
+                </subinterface>
+              </subinterfaces>
+            </interface>
+          </interfaces>
+        </config>
 """
 import os
 

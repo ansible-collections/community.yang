@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 DOCUMENTATION = """
-lookup: json2xml
+name: json2xml
 author: Ganesh Nalawade (@ganeshrn)
 short_description: Validates json configuration against yang data model and convert it to xml.
 description:
@@ -20,7 +20,7 @@ options:
   _terms:
     description:
       - Input json configuration file path that adheres to a particular yang model.
-    required: True
+    required: true
     type: path
   doctype:
     description:
@@ -30,7 +30,7 @@ options:
     description:
       - Path to yang model file against which the json configuration is validated and
         converted to xml.
-    required: True
+    required: true
     type: path
   search_path:
     description:
@@ -41,24 +41,26 @@ options:
   keep_tmp_files:
     description:
       - This is a boolean flag to indicate if the intermediate files generated while validation json
-       configuration should be kept or deleted. If the value is C(true) the files will not be deleted else by
+        configuration should be kept or deleted. If the value is C(true) the files will not be deleted else by
         default all the intermediate files will be deleted irrespective of whether task run is
         successful or not. The intermediate files are stored in path C(~/.ansible/tmp/json2xml), this
         option is mainly used for debugging purpose.
-    default: False
+    default: false
     type: bool
+
 """
 
 EXAMPLES = """
 - name: translate json to xml
   debug: msg="{{ lookup('yang_json2xml', config_json,
-                         yang_file='openconfig/public/release/models/interfaces/openconfig-interfaces.yang',
-                         search_path='openconfig/public/release/models:pyang/modules/') }}"
+    yang_file='openconfig/public/release/models/interfaces/openconfig-interfaces.yang',
+    search_path='openconfig/public/release/models:pyang/modules/') }}"
+
 """
 
 RETURN = """
 _raw:
-   description: The translated xml string from json
+    description: The translated xml string from json
 """
 
 import json
@@ -69,7 +71,9 @@ from ansible.module_utils._text import to_text
 from ansible.module_utils.six import raise_from
 from ansible.plugins.lookup import LookupBase
 
-from ansible_collections.community.yang.plugins.module_utils.translator import Translator
+from ansible_collections.community.yang.plugins.module_utils.translator import (
+    Translator,
+)
 
 
 try:
@@ -82,7 +86,10 @@ else:
 
 from ansible.utils.display import Display
 
-from ansible_collections.community.yang.plugins.common.base import JSON2XML_DIR_PATH, create_tmp_dir
+from ansible_collections.community.yang.plugins.common.base import (
+    JSON2XML_DIR_PATH,
+    create_tmp_dir,
+)
 
 
 display = Display()

@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 DOCUMENTATION = """
-lookup: xml2json
+name: xml2json
 author: Ganesh Nalawade (@ganeshrn)
 short_description: Converts xml input to json structure output by mapping it against corresponding Yang model
 description:
@@ -20,13 +20,13 @@ options:
     description:
       - Input xml file path that adheres to a given yang model. This can be a Netconf/Restconf xml rpc response
         that contains operational and configuration data received from remote host.
-    required: True
+    required: true
     type: path
   yang_file:
     description:
       - Path to yang model file against which the xml file is validated and converted to json as per json encoding
         of data modeled with YANG.
-    required: True
+    required: true
     type: path
   search_path:
     description:
@@ -37,24 +37,26 @@ options:
   keep_tmp_files:
     description:
       - This is a boolean flag to indicate if the intermediate files generated while validation json
-       configuration should be kept or deleted. If the value is C(true) the files will not be deleted else by
+        configuration should be kept or deleted. If the value is C(true) the files will not be deleted else by
         default all the intermediate files will be deleted irrespective of whether task run is
         successful or not. The intermediate files are stored in path C(~/.ansible/tmp/json2xml), this
         option is mainly used for debugging purpose.
-    default: False
+    default: false
     type: bool
+
 """
 
 EXAMPLES = """
 - name: translate json to xml
   debug: msg="{{ lookup('community.yang.xml2json', interfaces_config.xml,
-                         yang_file='openconfig/public/release/models/interfaces/openconfig-interfaces.yang',
-                         search_path='openconfig/public/release/models:pyang/modules/') }}"
+    yang_file='openconfig/public/release/models/interfaces/openconfig-interfaces.yang',
+    search_path='openconfig/public/release/models:pyang/modules/') }}"
+
 """
 
 RETURN = """
 _raw:
-   description: The translated json structure from xml
+    description: The translated json structure from xml
 """
 
 from ansible.errors import AnsibleLookupError
@@ -62,8 +64,13 @@ from ansible.module_utils._text import to_text
 from ansible.module_utils.six import raise_from
 from ansible.plugins.lookup import LookupBase
 
-from ansible_collections.community.yang.plugins.common.base import XM2JSON_DIR_PATH, create_tmp_dir
-from ansible_collections.community.yang.plugins.module_utils.translator import Translator
+from ansible_collections.community.yang.plugins.common.base import (
+    XM2JSON_DIR_PATH,
+    create_tmp_dir,
+)
+from ansible_collections.community.yang.plugins.module_utils.translator import (
+    Translator,
+)
 
 
 try:
