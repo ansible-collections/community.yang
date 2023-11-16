@@ -30,7 +30,7 @@ module Cisco-IOS-XR-infra-rsi-cfg {
 
      E-mail: cs-yang@cisco.com";
 
-  description 
+  description
     "This module contains a collection of YANG definitions
      for Cisco IOS-XR infra-rsi package configuration.
 

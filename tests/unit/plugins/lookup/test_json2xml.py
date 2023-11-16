@@ -5,18 +5,20 @@
 
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 import os
 import unittest
 
 from ansible.errors import AnsibleLookupError
-from ansible_collections.community.yang.plugins.lookup.json2xml import (
-    LookupModule,
-)
+
+from ansible_collections.community.yang.plugins.lookup.json2xml import LookupModule
+
 
 YANG_FILE_SEARCH_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "../../../fixtures/files"
+    os.path.dirname(os.path.abspath(__file__)),
+    "../../../fixtures/files",
 )
 OC_INTF_JSON_CONFIG_FILE_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -40,10 +42,13 @@ class TestValidate(unittest.TestCase):
         kwargs = {}
         with self.assertRaises(AnsibleLookupError) as error:
             self._lp.run(
-                [OC_INTF_JSON_CONFIG_FILE_PATH], LOOKUP_VARIABLES, **kwargs
+                [OC_INTF_JSON_CONFIG_FILE_PATH],
+                LOOKUP_VARIABLES,
+                **kwargs,
             )
         self.assertIn(
-            "value of 'yang_file' must be specified", str(error.exception)
+            "value of 'yang_file' must be specified",
+            str(error.exception),
         )
 
         # invalid json file value arguments
@@ -51,7 +56,8 @@ class TestValidate(unittest.TestCase):
         with self.assertRaises(AnsibleLookupError) as error:
             self._lp.run(["invalid path"], LOOKUP_VARIABLES, **kwargs)
         self.assertIn(
-            "Failed to load json configuration", str(error.exception)
+            "Failed to load json configuration",
+            str(error.exception),
         )
 
     def test_valid_json2xml_data(self):

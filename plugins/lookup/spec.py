@@ -6,6 +6,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 DOCUMENTATION = """
@@ -183,25 +184,24 @@ RETURN = """
             </config>
 """
 import os
-from ansible.plugins.lookup import LookupBase
+
 from ansible.errors import AnsibleLookupError
 from ansible.module_utils._text import to_text
-from ansible_collections.community.yang.plugins.module_utils.spec import (
-    GenerateSpec,
-)
-from ansible_collections.community.yang.plugins.common.base import (
-    create_tmp_dir,
-    YANG_SPEC_DIR_PATH,
-)
-
+from ansible.plugins.lookup import LookupBase
 from ansible.utils.display import Display
+
+from ansible_collections.community.yang.plugins.common.base import (
+    YANG_SPEC_DIR_PATH,
+    create_tmp_dir,
+)
+from ansible_collections.community.yang.plugins.module_utils.spec import GenerateSpec
+
 
 display = Display()
 
 
 class LookupModule(LookupBase):
     def run(self, terms, variables, **kwargs):
-
         res = []
         output = {}
         try:
@@ -229,7 +229,7 @@ class LookupModule(LookupBase):
         if doctype not in valid_doctype:
             raise AnsibleLookupError(
                 "doctype value %s is invalid, valid value are %s"
-                % (path, ", ".join(valid_doctype))
+                % (path, ", ".join(valid_doctype)),
             )
 
         try:
@@ -243,25 +243,26 @@ class LookupModule(LookupBase):
                 tmp_dir_path=tmp_dir_path,
             )
             output["json_skeleton"] = genspec_obj.generate_json_schema(
-                defaults=defaults
+                defaults=defaults,
             )
             defaults = False
 
             output["xml_skeleton"] = genspec_obj.generate_xml_schema(
-                defaults=defaults, annotations=annotations
+                defaults=defaults,
+                annotations=annotations,
             )
             output["tree"] = genspec_obj.generate_tree_schema()
 
             res.append(output)
         except ValueError as exc:
             raise AnsibleLookupError(
-                to_text(exc, errors="surrogate_then_replace")
+                to_text(exc, errors="surrogate_then_replace"),
             )
         except Exception as exc:
             raise AnsibleLookupError(
                 "Unhandled exception from [lookup][spec]. Error: {err}".format(
-                    err=to_text(exc, errors="surrogate_then_replace")
-                )
+                    err=to_text(exc, errors="surrogate_then_replace"),
+                ),
             )
 
         return res

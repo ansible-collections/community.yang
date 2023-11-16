@@ -49,7 +49,7 @@ module iana-if-type {
   revision 2015-06-12 {
     description
       "Corrected formatting issue.";
-  }  
+  }
   revision 2014-09-24 {
     description
       "Registered ifType 280.";

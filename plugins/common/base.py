@@ -5,12 +5,14 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 import os
 import uuid
 
-from ansible.utils.path import unfrackpath, makedirs_safe
+from ansible.utils.path import makedirs_safe, unfrackpath
+
 
 JSON2XML_DIR_PATH = "~/.ansible/tmp/yang/json2xml"
 XM2JSON_DIR_PATH = "~/.ansible/tmp/xml2json"

@@ -25,7 +25,7 @@ module Cisco-IOS-XR-l2-eth-infra-datatypes {
 
      E-mail: cs-yang@cisco.com";
 
-  description 
+  description
     "This module contains a collection of generally useful
      derived YANG data types.
 

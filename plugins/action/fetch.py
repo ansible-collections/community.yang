@@ -6,28 +6,26 @@
 #
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
-import os
 import json
+import os
 
-from ansible.module_utils import basic
 from ansible.errors import AnsibleActionFail
-from ansible.plugins.action import ActionBase
-from ansible.module_utils._text import to_text, to_bytes
+from ansible.module_utils import basic
+from ansible.module_utils._text import to_bytes, to_text
 from ansible.module_utils.connection import Connection
 from ansible.module_utils.six import iteritems
-from ansible.utils.path import unfrackpath, makedirs_safe
-from ansible_collections.community.yang.plugins.module_utils.fetch import (
-    SchemaStore,
-)
+from ansible.plugins.action import ActionBase
+from ansible.utils.path import makedirs_safe, unfrackpath
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
     convert_doc_to_ansible_module_kwargs,
     dict_merge,
 )
-from ansible_collections.community.yang.plugins.modules.fetch import (
-    DOCUMENTATION,
-)
+
+from ansible_collections.community.yang.plugins.module_utils.fetch import SchemaStore
+from ansible_collections.community.yang.plugins.modules.fetch import DOCUMENTATION
 
 
 ARGSPEC_CONDITIONALS = {"mutually_exclusive": [["name", "all"]]}
@@ -35,8 +33,7 @@ VALID_CONNECTION_TYPES = ["ansible.netcommon.netconf"]
 
 
 def generate_argspec():
-    """ Generate an argspec
-    """
+    """Generate an argspec"""
     argspec = convert_doc_to_ansible_module_kwargs(DOCUMENTATION)
     argspec = dict_merge(argspec, ARGSPEC_CONDITIONALS)
     return argspec
@@ -48,7 +45,7 @@ class ActionModule(ActionBase):
         self._result = {}
 
     def _fail_json(self, msg):
-        """ Replace the AnsibleModule fai_json here
+        """Replace the AnsibleModule fai_json here
         :param msg: The message for the failure
         :type msg: str
         """
@@ -62,18 +59,19 @@ class ActionModule(ActionBase):
         :type msg: str
         """
         msg = "<{phost}> [fetch][action] {msg}".format(
-            phost=self._playhost, msg=msg
+            phost=self._playhost,
+            msg=msg,
         )
         self._display.vvvv(msg)
 
     def _check_argspec(self):
-        """ Load the doc and convert
+        """Load the doc and convert
         Add the root conditionals to what was returned from the conversion
         and instantiate an AnsibleModule to validate
         """
         argspec = generate_argspec()
         basic._ANSIBLE_ARGS = to_bytes(
-            json.dumps({"ANSIBLE_MODULE_ARGS": self._task.args})
+            json.dumps({"ANSIBLE_MODULE_ARGS": self._task.args}),
         )
         basic.AnsibleModule.fail_json = self._fail_json
         basic.AnsibleModule(**argspec)
@@ -111,20 +109,20 @@ class ActionModule(ActionBase):
         if "netconf-monitoring" not in "\n".join(server_capabilities):
             raise AnsibleActionFail(
                 "remote netconf server does not support required capability"
-                " to fetch yang schema (urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring)."
+                " to fetch yang schema (urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring).",
             )
 
         try:
             ss = SchemaStore(conn, debug=self._debug)
         except ValueError as exc:
             raise AnsibleActionFail(
-                to_text(exc, errors="surrogate_then_replace")
+                to_text(exc, errors="surrogate_then_replace"),
             )
         except Exception as exc:
             raise AnsibleActionFail(
                 "Unhandled exception from fetch SchemaStore. Error: {err}".format(
-                    err=to_text(exc, errors="surrogate_then_replace")
-                )
+                    err=to_text(exc, errors="surrogate_then_replace"),
+                ),
             )
 
         result["fetched"] = dict()
@@ -137,22 +135,26 @@ class ActionModule(ActionBase):
                 if schema == "all":
                     for item in supported_yang_modules:
                         changed, counter = ss.run(
-                            item, result, continue_on_failure
+                            item,
+                            result,
+                            continue_on_failure,
                         )
                         total_count += counter
                 else:
                     changed, total_count = ss.run(
-                        schema, result, continue_on_failure
+                        schema,
+                        result,
+                        continue_on_failure,
                     )
         except ValueError as exc:
             raise AnsibleActionFail(
-                to_text(exc, errors="surrogate_then_replace")
+                to_text(exc, errors="surrogate_then_replace"),
             )
         except Exception as exc:
             raise AnsibleActionFail(
                 "Unhandled exception from get schema description. Error: {err}".format(
-                    err=to_text(exc, errors="surrogate_then_replace")
-                )
+                    err=to_text(exc, errors="surrogate_then_replace"),
+                ),
             )
 
         if schema:

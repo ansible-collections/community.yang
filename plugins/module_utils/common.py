@@ -4,10 +4,12 @@
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 import os
 import sys
+
 
 try:
     import importlib.util
@@ -31,7 +33,7 @@ def to_list(val):
 def find_file_in_path(filename):
     # Check $PATH first, followed by same directory as sys.argv[0]
     paths = os.environ["PATH"].split(os.pathsep) + [
-        os.path.dirname(sys.argv[0])
+        os.path.dirname(sys.argv[0]),
     ]
     for dirname in paths:
         fullpath = os.path.join(dirname, filename)
@@ -42,7 +44,7 @@ def find_file_in_path(filename):
 def find_share_path(filename):
     # Check $PATH first, followed by same directory as sys.argv[0]
     paths = os.environ["PATH"].split(os.pathsep) + [
-        os.path.dirname(sys.argv[0])
+        os.path.dirname(sys.argv[0]),
     ]
     for dirname in paths:
         env_path = os.sep.join(dirname.split(os.sep)[:-1])
@@ -60,6 +62,8 @@ def load_from_source(path, name):
         with open(to_bytes(path), "rb") as module_file:
             # to_native is used here because imp.load_source's path is for tracebacks and python's traceback formatting uses native strings
             module = imp.load_source(
-                to_native(name), to_native(path), module_file
+                to_native(name),
+                to_native(path),
+                module_file,
             )
     return module

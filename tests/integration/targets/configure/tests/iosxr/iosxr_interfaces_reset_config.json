@@ -2,13 +2,11 @@
   "openconfig-interfaces:interfaces": {
     "interface": [
       {
-        "name" : "GigabitEthernet0/0/0/2",
-        "config":
-        {
+        "name": "GigabitEthernet0/0/0/2",
+        "config": {
           "description": "No Description",
-          "name" : "GigabitEthernet0/0/0/2"
+          "name": "GigabitEthernet0/0/0/2"
         }
-
       }
     ]
   }

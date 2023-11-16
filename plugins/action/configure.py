@@ -6,43 +6,38 @@
 #
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 import json
-from ansible.plugins.action import ActionBase
 import os
-from ansible.module_utils._text import to_bytes, to_text
-from ansible.module_utils import basic
+
 from ansible.errors import AnsibleActionFail
+from ansible.module_utils import basic
+from ansible.module_utils._text import to_bytes, to_text
+from ansible.plugins.action import ActionBase
+
 
 try:
-    from lxml.etree import tostring, fromstring, XMLParser
+    from lxml.etree import XMLParser, fromstring, tostring
 except ImportError:
     from xml.etree.ElementTree import tostring, fromstring
 
-from ansible.module_utils.connection import (
-    ConnectionError as AnsibleConnectionError,
-)
+from ansible.module_utils.connection import ConnectionError as AnsibleConnectionError
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
     convert_doc_to_ansible_module_kwargs,
 )
-from ansible_collections.community.yang.plugins.modules.configure import (
-    DOCUMENTATION,
-)
-from ansible_collections.community.yang.plugins.module_utils.translator import (
-    Translator,
-)
-from ansible_collections.community.yang.plugins.common.base import (
-    create_tmp_dir,
-    JSON2XML_DIR_PATH,
-)
+
+from ansible_collections.community.yang.plugins.common.base import JSON2XML_DIR_PATH, create_tmp_dir
+from ansible_collections.community.yang.plugins.module_utils.translator import Translator
+from ansible_collections.community.yang.plugins.modules.configure import DOCUMENTATION
+
 
 VALID_CONNECTION_TYPES = ["ansible.netcommon.netconf"]
 
 
 def generate_argspec():
-    """ Generate an argspec
-    """
+    """Generate an argspec"""
     argspec = convert_doc_to_ansible_module_kwargs(DOCUMENTATION)
     return argspec
 
@@ -53,7 +48,7 @@ class ActionModule(ActionBase):
         self._result = {}
 
     def _fail_json(self, msg):
-        """ Replace the AnsibleModule fai_json here
+        """Replace the AnsibleModule fai_json here
         :param msg: The message for the failure
         :type msg: str
         """
@@ -67,25 +62,26 @@ class ActionModule(ActionBase):
         :type msg: str
         """
         msg = "<{phost}> [configure][action] {msg}".format(
-            phost=self._playhost, msg=msg
+            phost=self._playhost,
+            msg=msg,
         )
         self._display.vvvv(msg)
 
     def _check_argspec(self):
-        """ Load the doc and convert
+        """Load the doc and convert
         Add the root conditionals to what was returned from the conversion
         and instantiate an AnsibleModule to validate
         """
         argspec = generate_argspec()
 
         basic._ANSIBLE_ARGS = to_bytes(
-            json.dumps({"ANSIBLE_MODULE_ARGS": self._task.args})
+            json.dumps({"ANSIBLE_MODULE_ARGS": self._task.args}),
         )
         basic.AnsibleModule.fail_json = self._fail_json
         basic.AnsibleModule(**argspec)
 
     def _extended_check_argspec(self):
-        """ Check additional requirements for the argspec
+        """Check additional requirements for the argspec
         that cannot be covered using stnd techniques
         """
         errors = []
@@ -140,11 +136,10 @@ class ActionModule(ActionBase):
         yang_files = self._task.args.get("file", [])
         search_path = self._task.args.get("search_path") or None
         if not (
-            hasattr(self._connection, "socket_path")
-            and self._connection.socket_path is not None
+            hasattr(self._connection, "socket_path") and self._connection.socket_path is not None
         ):
             raise AnsibleConnectionError(
-                "netconf connection to remote host in not active"
+                "netconf connection to remote host in not active",
             )
 
         try:
@@ -153,13 +148,13 @@ class ActionModule(ActionBase):
             xml_data = tl.json_to_xml(json_config, tmp_dir_path)
         except ValueError as exc:
             raise AnsibleActionFail(
-                to_text(exc, errors="surrogate_then_replace")
+                to_text(exc, errors="surrogate_then_replace"),
             )
         except Exception as exc:
             raise AnsibleActionFail(
                 "Unhandled exception from [action][configure]. Error: {err}".format(
-                    err=to_text(exc, errors="surrogate_then_replace")
-                )
+                    err=to_text(exc, errors="surrogate_then_replace"),
+                ),
             )
 
         parser = XMLParser(ns_clean=True, recover=True, encoding="utf-8")
@@ -169,13 +164,13 @@ class ActionModule(ActionBase):
 
         if not self._shared_loader_obj.module_loader.has_plugin(module):
             result.update(
-                {"failed": True, "msg": "Could not find %s module." % module}
+                {"failed": True, "msg": "Could not find %s module." % module},
             )
         else:
             new_module_args = self._task.args.copy()
             if "netconf_options" in self._task.args:
                 new_module_args.update(
-                    self._task.args["netconf_options"].copy()
+                    self._task.args["netconf_options"].copy(),
                 )
             new_module_args["content"] = xml_data
 
@@ -183,7 +178,7 @@ class ActionModule(ActionBase):
                 new_module_args.pop(item, None)
 
             self._display.vvvv(
-                "Running %s module to fetch data from remote host" % module
+                "Running %s module to fetch data from remote host" % module,
             )
             result.update(
                 self._execute_module(
@@ -191,7 +186,7 @@ class ActionModule(ActionBase):
                     module_args=new_module_args,
                     task_vars=task_vars,
                     wrap_async=self._task.async_val,
-                )
+                ),
             )
         result.pop("server_capabilities", None)
         return result

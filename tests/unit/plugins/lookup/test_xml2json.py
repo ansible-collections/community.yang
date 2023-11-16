@@ -5,18 +5,20 @@
 
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 import os
 import unittest
 
 from ansible.errors import AnsibleLookupError
-from ansible_collections.community.yang.plugins.lookup.xml2json import (
-    LookupModule,
-)
+
+from ansible_collections.community.yang.plugins.lookup.xml2json import LookupModule
+
 
 YANG_FILE_SEARCH_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "../../../fixtures/files"
+    os.path.dirname(os.path.abspath(__file__)),
+    "../../../fixtures/files",
 )
 OC_INTF_XML_CONFIG_FILE_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -40,10 +42,13 @@ class TestValidate(unittest.TestCase):
         kwargs = {}
         with self.assertRaises(AnsibleLookupError) as error:
             self._lp.run(
-                [OC_INTF_XML_CONFIG_FILE_PATH], LOOKUP_VARIABLES, **kwargs
+                [OC_INTF_XML_CONFIG_FILE_PATH],
+                LOOKUP_VARIABLES,
+                **kwargs,
             )
         self.assertIn(
-            "value of 'yang_file' must be specified", str(error.exception)
+            "value of 'yang_file' must be specified",
+            str(error.exception),
         )
 
         # invalid json file value arguments
@@ -51,7 +56,8 @@ class TestValidate(unittest.TestCase):
         with self.assertRaises(AnsibleLookupError) as error:
             self._lp.run(["invalid path"], LOOKUP_VARIABLES, **kwargs)
         self.assertIn(
-            "Unable to create file or read XML data", str(error.exception)
+            "Unable to create file or read XML data",
+            str(error.exception),
         )
 
     def test_valid_xml2json_data(self):
@@ -65,20 +71,14 @@ class TestValidate(unittest.TestCase):
         }
         result = self._lp.run(terms, variables, **kwargs)
         self.assertEqual(
-            result[0]["openconfig-interfaces:interfaces"]["interface"][0][
-                "name"
-            ],
+            result[0]["openconfig-interfaces:interfaces"]["interface"][0]["name"],
             "GigabitEthernet0/0/0/2",
         )
         self.assertEqual(
-            result[0]["openconfig-interfaces:interfaces"]["interface"][0][
-                "config"
-            ]["mtu"],
+            result[0]["openconfig-interfaces:interfaces"]["interface"][0]["config"]["mtu"],
             1024,
         )
         self.assertEqual(
-            result[0]["openconfig-interfaces:interfaces"]["interface"][0][
-                "config"
-            ]["description"],
+            result[0]["openconfig-interfaces:interfaces"]["interface"][0]["config"]["description"],
             "configured by Ansible yang collection",
         )

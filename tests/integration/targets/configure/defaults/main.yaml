@@ -1,5 +1,5 @@
 ---
-testcase: '*'
+testcase: "*"
 
 # variables for community.yang.get module
 configure_yang_file: "{{ role_path }}/../fixtures/files/openconfig/interfaces/openconfig-interfaces.yang"

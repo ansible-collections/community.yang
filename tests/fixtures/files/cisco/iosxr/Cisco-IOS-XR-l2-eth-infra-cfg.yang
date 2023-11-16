@@ -34,7 +34,7 @@ module Cisco-IOS-XR-l2-eth-infra-cfg {
 
      E-mail: cs-yang@cisco.com";
 
-  description 
+  description
     "This module contains a collection of YANG definitions
      for Cisco IOS-XR l2-eth-infra package configuration.
 

@@ -1,14 +1,14 @@
 {
   "ietf-interfaces:interfaces": {
     "interface": [
-        {
-          "name": "mgmt@local",
-          "type": "iana-if-type:ipForward"
-        },
-        {
-          "name": "management",
-          "type": "iana-if-type:ethernetCsmacd"
-        }
+      {
+        "name": "mgmt@local",
+        "type": "iana-if-type:ipForward"
+      },
+      {
+        "name": "management",
+        "type": "iana-if-type:ethernetCsmacd"
+      }
     ]
   },
   "ietf-netconf-acm:nacm": {
@@ -16,15 +16,11 @@
       "group": [
         {
           "name": "system-support",
-          "user-name": [
-            "support-user"
-          ]
+          "user-name": ["support-user"]
         },
         {
           "name": "system-admin",
-          "user-name": [
-            "admin-user"
-          ]
+          "user-name": ["admin-user"]
         }
       ]
     }

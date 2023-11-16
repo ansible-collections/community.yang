@@ -5,34 +5,43 @@ This repo hosts the `community.yang` Ansible Collection.
 The collection includes the community plugins to help the support Yang manily with network devices.
 
 <!--start requires_ansible-->
+
 ## Ansible version compatibility
 
 This collection has been tested against following Ansible versions: **>=2.9.10**.
 
+For collections that support Ansible 2.9, please ensure you update your `network_os` to use the
+fully qualified collection name (for example, `cisco.ios.ios`).
 Plugins and modules within a collection may be tested with only specific Ansible versions.
 A collection may contain metadata that identifies these versions.
 PEP440 is the schema used to describe the versions of Ansible.
+
 <!--end requires_ansible-->
 
 ### Supported connections
-The Community yang collection supports ``netconf`` connections.
+
+The Community yang collection supports `netconf` connections.
 
 ## Included content
+
 <!--start collection content-->
+
 ### Lookup plugins
-Name | Description
---- | ---
-[community.yang.json2xml](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.json2xml_lookup.rst)|Validates json configuration against yang data model and convert it to xml.
-[community.yang.spec](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.spec_lookup.rst)|This plugin reads the content of given yang document and generates json and xml configuration skeleton and a tree structure of yang document.
-[community.yang.xml2json](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.xml2json_lookup.rst)|Converts xml input to json structure output by mapping it against corresponding Yang model
+
+| Name                                                                                                                               | Description                                                                                                                                   |
+| ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [community.yang.json2xml](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.json2xml_lookup.rst) | Validates json configuration against yang data model and convert it to xml.                                                                   |
+| [community.yang.spec](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.spec_lookup.rst)         | This plugin reads the content of given yang document and generates json and xml configuration skeleton and a tree structure of yang document. |
+| [community.yang.xml2json](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.xml2json_lookup.rst) | Converts xml input to json structure output by mapping it against corresponding Yang model                                                    |
 
 ### Modules
-Name | Description
---- | ---
-[community.yang.configure](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.configure_module.rst)|Reads the input configuration in JSON format and pushes to the remote host over netconf
-[community.yang.fetch](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.fetch_module.rst)|Fetch given yang model and it's dependencies
-[community.yang.generate_spec](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.generate_spec_module.rst)|Generate JSON/XML schema and tree representation for given YANG model
-[community.yang.get](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.get_module.rst)|Fetch the device configuration and render it in JSON format defined by RFC7951
+
+| Name                                                                                                                                         | Description                                                                             |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [community.yang.configure](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.configure_module.rst)         | Reads the input configuration in JSON format and pushes to the remote host over netconf |
+| [community.yang.fetch](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.fetch_module.rst)                 | Fetch given yang model and it's dependencies                                            |
+| [community.yang.generate_spec](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.generate_spec_module.rst) | Generate JSON/XML schema and tree representation for given YANG model                   |
+| [community.yang.get](https://github.com/ansible-collections/community.yang/blob/main/docs/community.yang.get_module.rst)                     | Fetch the device configuration and render it in JSON format defined by RFC7951          |
 
 <!--end collection content-->
 
@@ -53,6 +62,7 @@ collections:
 ```
 
 ### Platforms test against
+
     1. Cisco IOSXR 6.1.3
 
 ### Using modules from the yang Collection in your playbooks
@@ -130,6 +140,7 @@ It's preferable to use content in this collection using their Fully Qualified Co
         tree_schema:
           path: "./output/{{ inventory_hostname }}/openconfig-interfaces-config.tree"t
 ```
+
 For documentation on how to use individual modules and other content included in this collection, please see the links in the 'Included content' section earlier in this README.
 
 ## Testing and Development
@@ -144,25 +155,23 @@ To run these network integration tests, use ansible-test network-integration --i
 
     ansible-test network-integration  --inventory ~/myinventory -vvv <name of the plugin>
 
-
 ## Publishing New Versions
 
 Releases are automatically built and pushed to Ansible Galaxy for any new tag. Before tagging a release, make sure to do the following:
 
-  1. Update `galaxy.yml` and this README's `requirements.yml` example with the new `version` for the collection.
-  2. Update the CHANGELOG:
-    1. Make sure you have [`antsibull-changelog`](https://pypi.org/project/antsibull-changelog/) installed.
-    2. Make sure there are fragments for all known changes in `changelogs/fragments`.
-    3. Run `antsibull-changelog release`.
-  3. Commit the changes and create a PR with the changes. Wait for tests to pass, then merge it once they have.
-  4. Tag the version in Git and push to GitHub.
-     ```
-After the version is published, verify it exists on the [Ansible Yang Community Collection Galaxy page](https://galaxy.ansible.com/community/yang).
-
+1. Update `galaxy.yml` and this README's `requirements.yml` example with the new `version` for the collection.
+2. Update the CHANGELOG:
+3. Make sure you have [`antsibull-changelog`](https://pypi.org/project/antsibull-changelog/) installed.
+4. Make sure there are fragments for all known changes in `changelogs/fragments`.
+5. Run `antsibull-changelog release`.
+6. Commit the changes and create a PR with the changes. Wait for tests to pass, then merge it once they have.
+7. Tag the version in Git and push to GitHub.
+   ```
+   After the version is published, verify it exists on the [Ansible Yang Community Collection Galaxy page](https://galaxy.ansible.com/community/yang).
 
 ### See Also:
 
-* [Ansible Using collections](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html) for more details.
+- [Ansible Using collections](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html) for more details.
 
 ## Contributing to this collection
 
@@ -174,11 +183,10 @@ We welcome community contributions to this collection. If you find problems, ple
 
 You can also join us on:
 
-- IRC - the ``#ansible-network`` [libera.chat](https://libera.chat/) channel
+- IRC - the `#ansible-network` [libera.chat](https://libera.chat/) channel
 - Slack - https://ansiblenetwork.slack.com
 
 See the [Ansible Community Guide](https://docs.ansible.com/ansible/latest/community/index.html) for details on contributing to Ansible.
-
 
 ## Changelogs
 

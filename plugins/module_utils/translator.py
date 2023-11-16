@@ -4,29 +4,31 @@
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 import glob
+import json
 import os
 import re
-import sys
 import shutil
+import sys
 import time
-import json
 import uuid
 
 from copy import deepcopy
 
-from ansible.module_utils.basic import missing_required_lib
 from ansible.module_utils._text import to_text
+from ansible.module_utils.basic import missing_required_lib
 from ansible.module_utils.six import StringIO
 
 from ansible_collections.community.yang.plugins.module_utils.common import (
-    load_from_source,
     find_file_in_path,
     find_share_path,
+    load_from_source,
     to_list,
 )
+
 
 try:
     import pyang  # noqa
@@ -123,22 +125,23 @@ class Translator(object):
         if isinstance(json_data, dict):
             # input is in json format, copy it to file in temporary location
             json_file_path = os.path.join(
-                tmp_dir_path, "%s.%s" % (str(uuid.uuid4()), "json")
+                tmp_dir_path,
+                "%s.%s" % (str(uuid.uuid4()), "json"),
             )
             json_file_path = os.path.realpath(
-                os.path.expanduser(json_file_path)
+                os.path.expanduser(json_file_path),
             )
             with open(json_file_path, "w") as f:
                 f.write(json.dumps(json_data))
             json_file_path = os.path.realpath(
-                os.path.expanduser(json_file_path)
+                os.path.expanduser(json_file_path),
             )
 
         elif os.path.isfile(json_data):
             json_file_path = json_data
         else:
             raise ValueError(
-                "unable to create/find temporary json file %s" % json_data
+                "unable to create/find temporary json file %s" % json_data,
             )
 
         try:
@@ -148,19 +151,22 @@ class Translator(object):
         except Exception as exc:
             raise ValueError(
                 "Failed to load json configuration: %s"
-                % (to_text(exc, errors="surrogate_or_strict"))
+                % (to_text(exc, errors="surrogate_or_strict")),
             )
         jtox_file_path = os.path.join(
-            tmp_dir_path, "%s.%s" % (str(uuid.uuid4()), "jtox")
+            tmp_dir_path,
+            "%s.%s" % (str(uuid.uuid4()), "jtox"),
         )
         xml_file_path = os.path.join(
-            tmp_dir_path, "%s.%s" % (str(uuid.uuid4()), "xml")
+            tmp_dir_path,
+            "%s.%s" % (str(uuid.uuid4()), "xml"),
         )
         jtox_file_path = os.path.realpath(os.path.expanduser(jtox_file_path))
         xml_file_path = os.path.realpath(os.path.expanduser(xml_file_path))
 
         yang_metada_dir = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "files/yang"
+            os.path.dirname(os.path.abspath(__file__)),
+            "files/yang",
         )
         yang_metadata_path = os.path.join(yang_metada_dir, "nc-op.yang")
         self._search_path += ":%s" % yang_metada_dir
@@ -183,7 +189,7 @@ class Translator(object):
         if self._debug:
             self._debug(
                 "Generating jtox file '%s' by executing command '%s'"
-                % (jtox_file_path, " ".join(sys.argv))
+                % (jtox_file_path, " ".join(sys.argv)),
             )
         try:
             self._pyang_module.run()
@@ -195,7 +201,7 @@ class Translator(object):
                 ignore_errors=True,
             )
             raise ValueError(
-                "Error while generating intermediate (jtox) file: %s" % e
+                "Error while generating intermediate (jtox) file: %s" % e,
             )
         finally:
             err = sys.stderr.getvalue()
@@ -206,7 +212,7 @@ class Translator(object):
                         ignore_errors=True,
                     )
                 raise ValueError(
-                    "Error while generating intermediate (jtox) file: %s" % err
+                    "Error while generating intermediate (jtox) file: %s" % err,
                 )
 
         json2xml_exec_path = find_file_in_path("json2xml")
@@ -226,7 +232,7 @@ class Translator(object):
         if self._debug:
             self._debug(
                 "Generating xml file '%s' by executing command '%s'"
-                % (xml_file_path, " ".join(sys.argv))
+                % (xml_file_path, " ".join(sys.argv)),
             )
         try:
             json2xml_module.main()
@@ -235,7 +241,7 @@ class Translator(object):
                 content = to_text(b_content, errors="surrogate_or_strict")
         except UnicodeError as uni_error:
             raise ValueError(
-                "Error while translating to text: %s" % str(uni_error)
+                "Error while translating to text: %s" % str(uni_error),
             )
         except SystemExit:
             pass
@@ -272,20 +278,19 @@ class Translator(object):
         :param xml_data: XML data or file path containing xml data that should to translated to JSON
         :param tmp_dir_path: Temporary directory path to copy intermediate files
         :return: data in JSON format.
-    """
+        """
 
         try:
             etree.fromstring(xml_data)
             # input is xml string, copy it to file in temporary location
             xml_file_path = os.path.join(
-                tmp_dir_path, "%s.%s" % (str(uuid.uuid4()), "xml")
+                tmp_dir_path,
+                "%s.%s" % (str(uuid.uuid4()), "xml"),
             )
             xml_file_path = os.path.realpath(os.path.expanduser(xml_file_path))
             with open(xml_file_path, "w") as f:
                 if not xml_data.startswith("<?xml version"):
-                    xml_data = (
-                        '<?xml version="1.0" encoding="UTF-8"?>\n' + xml_data
-                    )
+                    xml_data = '<?xml version="1.0" encoding="UTF-8"?>\n' + xml_data
                 data = xml_data
                 f.write(data)
         except etree.XMLSyntaxError:
@@ -299,7 +304,7 @@ class Translator(object):
                         ignore_errors=True,
                     )
                 raise ValueError(
-                    "Unable to create file or read XML data %s" % xml_data
+                    "Unable to create file or read XML data %s" % xml_data,
                 )
 
         xml_file_path = os.path.realpath(os.path.expanduser(xml_file_path))
@@ -310,8 +315,7 @@ class Translator(object):
                 etree.parse(xml_file_path)
                 if self._debug:
                     self._debug(
-                        "Parsing xml data from temporary file: %s"
-                        % xml_file_path
+                        "Parsing xml data from temporary file: %s" % xml_file_path,
                     )
             except Exception as exc:
                 if not self._keep_tmp_files:
@@ -320,8 +324,7 @@ class Translator(object):
                         ignore_errors=True,
                     )
                 raise ValueError(
-                    "Failed to load xml data: %s"
-                    % (to_text(exc, errors="surrogate_or_strict"))
+                    "Failed to load xml data: %s" % (to_text(exc, errors="surrogate_or_strict")),
                 )
 
         base_pyang_path = sys.modules["pyang"].__file__
@@ -336,21 +339,24 @@ class Translator(object):
 
         jsonxsl_relative_dirpath = os.path.join("yang", "xslt")
         jsonxsl_dir_path = find_share_path(
-            os.path.join(jsonxsl_relative_dirpath, "jsonxsl-templates.xsl")
+            os.path.join(jsonxsl_relative_dirpath, "jsonxsl-templates.xsl"),
         )
         if jsonxsl_dir_path is None:
             raise ValueError(
-                "Could not find jsonxsl-templates.xsl in environment path"
+                "Could not find jsonxsl-templates.xsl in environment path",
             )
         os.environ["PYANG_XSLT_DIR"] = os.path.join(
-            jsonxsl_dir_path, jsonxsl_relative_dirpath
+            jsonxsl_dir_path,
+            jsonxsl_relative_dirpath,
         )
 
         xsl_file_path = os.path.join(
-            tmp_dir_path, "%s.%s" % (str(uuid.uuid4()), "xsl")
+            tmp_dir_path,
+            "%s.%s" % (str(uuid.uuid4()), "xsl"),
         )
         json_file_path = os.path.join(
-            tmp_dir_path, "%s.%s" % (str(uuid.uuid4()), "json")
+            tmp_dir_path,
+            "%s.%s" % (str(uuid.uuid4()), "json"),
         )
         xls_file_path = os.path.realpath(os.path.expanduser(xsl_file_path))
         json_file_path = os.path.realpath(os.path.expanduser(json_file_path))
@@ -370,7 +376,7 @@ class Translator(object):
         if self._debug:
             self._debug(
                 "Generating xsl file '%s' by executing command '%s'"
-                % (xls_file_path, " ".join(sys.argv))
+                % (xls_file_path, " ".join(sys.argv)),
             )
         try:
             self._pyang_module.run()
@@ -383,7 +389,7 @@ class Translator(object):
                     ignore_errors=True,
                 )
             raise ValueError(
-                "Error while generating intermediate (xsl) file: %s" % e
+                "Error while generating intermediate (xsl) file: %s" % e,
             )
         finally:
             err = sys.stderr.getvalue()
@@ -394,14 +400,14 @@ class Translator(object):
                         ignore_errors=True,
                     )
                 raise ValueError(
-                    "Error while generating (xsl) intermediate file: %s" % err
+                    "Error while generating (xsl) intermediate file: %s" % err,
                 )
 
         xsltproc_exec_path = find_file_in_path("xsltproc")
         if not xsltproc_exec_path:
             raise ValueError(
                 "xsltproc executable not found."
-                " Install 'libxml2-dev' and 'libxslt-dev' packages"
+                " Install 'libxml2-dev' and 'libxslt-dev' packages",
             )
 
         # fill in the sys args before invoking xsltproc
@@ -416,7 +422,7 @@ class Translator(object):
         if self._debug:
             self._debug(
                 "Generating json data in temp file '%s' by executing command '%s'"
-                % (json_file_path, " ".join(sys.argv))
+                % (json_file_path, " ".join(sys.argv)),
             )
         time.sleep(5)
 
@@ -440,16 +446,14 @@ class Translator(object):
         try:
             if self._debug:
                 self._debug(
-                    "Reading output json data from temporary file: %s"
-                    % json_file_path
+                    "Reading output json data from temporary file: %s" % json_file_path,
                 )
             with open(json_file_path, "r") as fp:
                 raw_content = fp.read()
                 content = json.loads(raw_content)
         except Exception as e:
             raise ValueError(
-                "Error while reading json document %s from path %s"
-                % (e, json_file_path)
+                "Error while reading json document %s from path %s" % (e, json_file_path),
             )
         finally:
             if not self._keep_tmp_files:

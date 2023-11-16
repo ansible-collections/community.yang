@@ -5,6 +5,7 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 DOCUMENTATION = """
@@ -56,19 +57,14 @@ _raw:
    description: The translated json structure from xml
 """
 
-from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleLookupError
-from ansible.module_utils.six import raise_from
 from ansible.module_utils._text import to_text
+from ansible.module_utils.six import raise_from
+from ansible.plugins.lookup import LookupBase
 
-from ansible_collections.community.yang.plugins.module_utils.translator import (
-    Translator,
-)
+from ansible_collections.community.yang.plugins.common.base import XM2JSON_DIR_PATH, create_tmp_dir
+from ansible_collections.community.yang.plugins.module_utils.translator import Translator
 
-from ansible_collections.community.yang.plugins.common.base import (
-    create_tmp_dir,
-    XM2JSON_DIR_PATH,
-)
 
 try:
     import pyang  # noqa
@@ -78,6 +74,7 @@ else:
     PYANG_IMPORT_ERROR = None
 
 from ansible.utils.display import Display
+
 
 display = Display()
 
@@ -96,7 +93,7 @@ class LookupModule(LookupBase):
         if PYANG_IMPORT_ERROR:
             raise_from(
                 AnsibleLookupError(
-                    "pyang must be installed to use this plugin"
+                    "pyang must be installed to use this plugin",
                 ),
                 PYANG_IMPORT_ERROR,
             )
@@ -128,13 +125,13 @@ class LookupModule(LookupBase):
             json_data = tl.xml_to_json(xml_file, tmp_dir_path)
         except ValueError as exc:
             raise AnsibleLookupError(
-                to_text(exc, errors="surrogate_then_replace")
+                to_text(exc, errors="surrogate_then_replace"),
             )
         except Exception as exc:
             raise AnsibleLookupError(
                 "Unhandled exception from [lookup][xml2json]. Error: {err}".format(
-                    err=to_text(exc, errors="surrogate_then_replace")
-                )
+                    err=to_text(exc, errors="surrogate_then_replace"),
+                ),
             )
 
         res.append(json_data)

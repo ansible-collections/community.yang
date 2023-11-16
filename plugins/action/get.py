@@ -6,32 +6,25 @@
 #
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 import json
 import os
 
-from ansible.plugins.action import ActionBase
-from ansible.module_utils._text import to_bytes, to_text
-from ansible.module_utils import basic
-from ansible.module_utils.connection import (
-    ConnectionError as AnsibleConnectionError,
-)
 from ansible.errors import AnsibleActionFail
-from ansible_collections.community.yang.plugins.module_utils.translator import (
-    Translator,
-)
-
+from ansible.module_utils import basic
+from ansible.module_utils._text import to_bytes, to_text
+from ansible.module_utils.connection import ConnectionError as AnsibleConnectionError
+from ansible.plugins.action import ActionBase
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
     convert_doc_to_ansible_module_kwargs,
 )
-from ansible_collections.community.yang.plugins.modules.get import (
-    DOCUMENTATION,
-)
-from ansible_collections.community.yang.plugins.common.base import (
-    create_tmp_dir,
-    XM2JSON_DIR_PATH,
-)
+
+from ansible_collections.community.yang.plugins.common.base import XM2JSON_DIR_PATH, create_tmp_dir
+from ansible_collections.community.yang.plugins.module_utils.translator import Translator
+from ansible_collections.community.yang.plugins.modules.get import DOCUMENTATION
+
 
 VALID_CONNECTION_TYPES = ["ansible.netcommon.netconf"]
 
@@ -42,7 +35,7 @@ class ActionModule(ActionBase):
         self._result = {}
 
     def _fail_json(self, msg):
-        """ Replace the AnsibleModule fail_json here
+        """Replace the AnsibleModule fail_json here
         :param msg: The message for the failure
         :type msg: str
         """
@@ -56,24 +49,25 @@ class ActionModule(ActionBase):
         :type msg: str
         """
         msg = "<{phost}> [get][action] {msg}".format(
-            phost=self._playhost, msg=msg
+            phost=self._playhost,
+            msg=msg,
         )
         self._display.vvvv(msg)
 
     def _check_argspec(self):
-        """ Load the doc and convert
+        """Load the doc and convert
         Add the root conditionals to what was returned from the conversion
         and instantiate an AnsibleModule to validate
         """
         argspec = convert_doc_to_ansible_module_kwargs(DOCUMENTATION)
         basic._ANSIBLE_ARGS = to_bytes(
-            json.dumps({"ANSIBLE_MODULE_ARGS": self._task.args})
+            json.dumps({"ANSIBLE_MODULE_ARGS": self._task.args}),
         )
         basic.AnsibleModule.fail_json = self._fail_json
         basic.AnsibleModule(**argspec)
 
     def _extended_check_argspec(self):
-        """ Check additional requirements for the argspec
+        """Check additional requirements for the argspec
         that cannot be covered using stnd techniques
         """
         errors = []
@@ -111,18 +105,17 @@ class ActionModule(ActionBase):
         search_path = self._task.args.get("search_path")
 
         if not (
-            hasattr(self._connection, "socket_path")
-            and self._connection.socket_path is not None
+            hasattr(self._connection, "socket_path") and self._connection.socket_path is not None
         ):
             raise AnsibleConnectionError(
-                "netconf connection to remote host in not active"
+                "netconf connection to remote host in not active",
             )
 
         module = "ansible.netcommon.netconf_get"
 
         if not self._shared_loader_obj.module_loader.has_plugin(module):
             result.update(
-                {"failed": True, "msg": "Could not find %s module." % module}
+                {"failed": True, "msg": "Could not find %s module." % module},
             )
         else:
             new_module_args = self._task.args.copy()
@@ -130,7 +123,7 @@ class ActionModule(ActionBase):
                 new_module_args.pop(item, None)
 
             self._display.vvvv(
-                "Running %s module to fetch data from remote host" % module
+                "Running %s module to fetch data from remote host" % module,
             )
             result.update(
                 self._execute_module(
@@ -138,7 +131,7 @@ class ActionModule(ActionBase):
                     module_args=new_module_args,
                     task_vars=task_vars,
                     wrap_async=self._task.async_val,
-                )
+                ),
             )
 
         if result.get("failed"):
@@ -149,20 +142,23 @@ class ActionModule(ActionBase):
 
             # convert XML data to JSON data as per RFC 7951 format
             tl = Translator(
-                yang_files, search_path=search_path, debug=self._debug
+                yang_files,
+                search_path=search_path,
+                debug=self._debug,
             )
             result["json_data"] = tl.xml_to_json(
-                result["stdout"], tmp_dir_path
+                result["stdout"],
+                tmp_dir_path,
             )
         except ValueError as exc:
             raise AnsibleActionFail(
-                to_text(exc, errors="surrogate_then_replace")
+                to_text(exc, errors="surrogate_then_replace"),
             )
         except Exception as exc:
             raise AnsibleActionFail(
                 "Unhandled exception from [action][get]. Error: {err}".format(
-                    err=to_text(exc, errors="surrogate_then_replace")
-                )
+                    err=to_text(exc, errors="surrogate_then_replace"),
+                ),
             )
 
         result["xml_data"] = result["stdout"]

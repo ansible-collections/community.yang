@@ -1,72 +1,73 @@
 ---
-- debug: msg="START community.yang.fetch iosxr/basic.yaml on connection={{ ansible_connection
+- debug:
+    msg="START community.yang.fetch iosxr/basic.yaml on connection={{ ansible_connection
     }}"
 
 - name: Fetch base and dependant openconfig-interfaces yang data models
   community.yang.fetch:
-      name: openconfig-interfaces
+    name: openconfig-interfaces
   register: result
 
 - assert:
-      that:
-          - "result.changed == true"
-          - "result.number_schema_fetched == 4"
-          - "'ietf-interfaces' in result.fetched"
-          - "'ietf-yang-types' in result.fetched"
-          - "'openconfig-extensions' in result.fetched"
-          - "'openconfig-interfaces' in result.fetched"
+    that:
+      - "result.changed == true"
+      - "result.number_schema_fetched == 4"
+      - "'ietf-interfaces' in result.fetched"
+      - "'ietf-yang-types' in result.fetched"
+      - "'openconfig-extensions' in result.fetched"
+      - "'openconfig-interfaces' in result.fetched"
 
 - name: Wrong yang name
   community.yang.fetch:
-      name: openconfig-interfacess
+    name: openconfig-interfacess
   ignore_errors: true
   register: result
 
 - assert:
-      that:
-          - "result.failed == true"
-          - "'Fail to fetch \\'openconfig-interfacess\\' yang model' in result.msg"
+    that:
+      - "result.failed == true"
+      - "'Fail to fetch \\'openconfig-interfacess\\' yang model' in result.msg"
 
 - name: Fetch base and dependant openconfig-bgp yang data models
   community.yang.fetch:
-      name: openconfig-bgp
+    name: openconfig-bgp
   register: result
 
 - assert:
-      that:
-          - "result.changed == true"
-          - "result.number_schema_fetched == 10"
-          - "'ietf-inet-types' in result.fetched"
-          - "'ietf-yang-types' in result.fetched"
-          - "'openconfig-bgp-multiprotocol' in result.fetched"
-          - "'openconfig-bgp-operational' in result.fetched"
-          - "'openconfig-bgp-types' in result.fetched"
-          - "'openconfig-bgp' in result.fetched"
-          - "'openconfig-extensions' in result.fetched"
-          - "'openconfig-policy-types' in result.fetched"
-          - "'openconfig-routing-policy' in result.fetched"
-          - "'openconfig-types' in result.fetched"
+    that:
+      - "result.changed == true"
+      - "result.number_schema_fetched == 10"
+      - "'ietf-inet-types' in result.fetched"
+      - "'ietf-yang-types' in result.fetched"
+      - "'openconfig-bgp-multiprotocol' in result.fetched"
+      - "'openconfig-bgp-operational' in result.fetched"
+      - "'openconfig-bgp-types' in result.fetched"
+      - "'openconfig-bgp' in result.fetched"
+      - "'openconfig-extensions' in result.fetched"
+      - "'openconfig-policy-types' in result.fetched"
+      - "'openconfig-routing-policy' in result.fetched"
+      - "'openconfig-types' in result.fetched"
 
 - name: Test for supported_yang_modules in result
   community.yang.fetch:
   register: result
 
 - assert:
-      that:
-          - "'supported_yang_modules' in result"
+    that:
+      - "'supported_yang_modules' in result"
 
 - name: Fetch all the yang models supported by remote host and store it in dir location
   community.yang.fetch:
-      name: all
-      dir: "/tmp/yang_files"
+    name: all
+    dir: "/tmp/yang_files"
   register: result
   vars:
-      ansible_command_timeout: 600
+    ansible_command_timeout: 600
 
 - assert:
-      that:
-          - "result.changed == true"
-          - "result.number_schema_fetched > 300"
+    that:
+      - "result.changed == true"
+      - "result.number_schema_fetched > 300"
 
 - name: assert files are present
   delegate_to: localhost
@@ -74,8 +75,9 @@
   register: result
 
 - assert:
-      that:
-          - "result.stdout_lines | length > 300"
+    that:
+      - "result.stdout_lines | length > 300"
 
-- debug: msg="END community.yang.fetch iosxr/basic.yaml on connection={{ ansible_connection
+- debug:
+    msg="END community.yang.fetch iosxr/basic.yaml on connection={{ ansible_connection
     }}"

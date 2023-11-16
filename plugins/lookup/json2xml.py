@@ -5,6 +5,7 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 DOCUMENTATION = """
@@ -60,17 +61,16 @@ _raw:
    description: The translated xml string from json
 """
 
-import os
 import json
+import os
 
-from ansible.plugins.lookup import LookupBase
-from ansible.module_utils.six import raise_from
-from ansible.module_utils._text import to_text
 from ansible.errors import AnsibleLookupError
+from ansible.module_utils._text import to_text
+from ansible.module_utils.six import raise_from
+from ansible.plugins.lookup import LookupBase
 
-from ansible_collections.community.yang.plugins.module_utils.translator import (
-    Translator,
-)
+from ansible_collections.community.yang.plugins.module_utils.translator import Translator
+
 
 try:
     import pyang  # noqa
@@ -82,10 +82,8 @@ else:
 
 from ansible.utils.display import Display
 
-from ansible_collections.community.yang.plugins.common.base import (
-    create_tmp_dir,
-    JSON2XML_DIR_PATH,
-)
+from ansible_collections.community.yang.plugins.common.base import JSON2XML_DIR_PATH, create_tmp_dir
+
 
 display = Display()
 
@@ -104,7 +102,7 @@ class LookupModule(LookupBase):
         if PYANG_IMPORT_ERROR:
             raise_from(
                 AnsibleLookupError(
-                    "pyang must be installed to use this plugin"
+                    "pyang must be installed to use this plugin",
                 ),
                 PYANG_IMPORT_ERROR,
             )
@@ -131,7 +129,7 @@ class LookupModule(LookupBase):
         except Exception as exc:
             raise AnsibleLookupError(
                 "Failed to load json configuration: %s"
-                % (to_text(exc, errors="surrogate_or_strict"))
+                % (to_text(exc, errors="surrogate_or_strict")),
             )
 
         try:
@@ -149,13 +147,13 @@ class LookupModule(LookupBase):
             xml_data = tl.json_to_xml(json_config, tmp_dir_path)
         except ValueError as exc:
             raise AnsibleLookupError(
-                to_text(exc, errors="surrogate_then_replace")
+                to_text(exc, errors="surrogate_then_replace"),
             )
         except Exception as exc:
             raise AnsibleLookupError(
                 "Unhandled exception from [lookup][json2xml]. Error: {err}".format(
-                    err=to_text(exc, errors="surrogate_then_replace")
-                )
+                    err=to_text(exc, errors="surrogate_then_replace"),
+                ),
             )
 
         res.append(xml_data)

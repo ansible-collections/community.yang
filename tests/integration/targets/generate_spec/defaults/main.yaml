@@ -1,5 +1,5 @@
 ---
-testcase: '*'
+testcase: "*"
 
 # variables for spec lookup plugin
 spec_yang_file: "{{ role_path }}/../../../fixtures/files/openconfig/interfaces/openconfig-interfaces.yang"

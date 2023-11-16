@@ -1,5 +1,5 @@
 ---
-testcase: '*'
+testcase: "*"
 
 # variables for community.yang.get module
 get_yang_file: "{{ role_path }}/../../../fixtures/files/cisco/iosxr/*.yang"

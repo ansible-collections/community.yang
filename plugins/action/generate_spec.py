@@ -6,31 +6,27 @@
 #
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 import json
-from ansible.plugins.action import ActionBase
 import os
 
-
-from ansible.module_utils._text import to_bytes, to_text
-from ansible.module_utils import basic
 from ansible.errors import AnsibleActionFail
-
-from ansible_collections.community.yang.plugins.module_utils.spec import (
-    GenerateSpec,
-)
+from ansible.module_utils import basic
+from ansible.module_utils._text import to_bytes, to_text
+from ansible.plugins.action import ActionBase
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
     convert_doc_to_ansible_module_kwargs,
     dict_merge,
 )
+
 from ansible_collections.community.yang.plugins.common.base import (
-    create_tmp_dir,
     YANG_SPEC_DIR_PATH,
+    create_tmp_dir,
 )
-from ansible_collections.community.yang.plugins.modules.generate_spec import (
-    DOCUMENTATION,
-)
+from ansible_collections.community.yang.plugins.module_utils.spec import GenerateSpec
+from ansible_collections.community.yang.plugins.modules.generate_spec import DOCUMENTATION
 
 
 ARGSPEC_CONDITIONALS = {
@@ -41,8 +37,7 @@ VALID_CONNECTION_TYPES = ["ansible.netcommon.netconf"]
 
 
 def generate_argspec():
-    """ Generate an argspec
-    """
+    """Generate an argspec"""
     argspec = convert_doc_to_ansible_module_kwargs(DOCUMENTATION)
     argspec = dict_merge(argspec, ARGSPEC_CONDITIONALS)
     return argspec
@@ -54,7 +49,7 @@ class ActionModule(ActionBase):
         self._result = {}
 
     def _fail_json(self, msg):
-        """ Replace the AnsibleModule fai_json here
+        """Replace the AnsibleModule fai_json here
         :param msg: The message for the failure
         :type msg: str
         """
@@ -68,24 +63,25 @@ class ActionModule(ActionBase):
         :type msg: str
         """
         msg = "<{phost}> [generate_spec][action] {msg}".format(
-            phost=self._playhost, msg=msg
+            phost=self._playhost,
+            msg=msg,
         )
         self._display.vvvv(msg)
 
     def _check_argspec(self):
-        """ Load the doc and convert
+        """Load the doc and convert
         Add the root conditionals to what was returned from the conversion
         and instantiate an AnsibleModule to validate
         """
         argspec = generate_argspec()
         basic._ANSIBLE_ARGS = to_bytes(
-            json.dumps({"ANSIBLE_MODULE_ARGS": self._task.args})
+            json.dumps({"ANSIBLE_MODULE_ARGS": self._task.args}),
         )
         basic.AnsibleModule.fail_json = self._fail_json
         basic.AnsibleModule(**argspec)
 
     def _extended_check_argspec(self):
-        """ Check additional requirements for the argspec
+        """Check additional requirements for the argspec
         that cannot be covered using stnd techniques
         """
         errors = []
@@ -152,7 +148,8 @@ class ActionModule(ActionBase):
                 if "path" in json_schema:
                     schema_out_path = json_schema["path"]
             result["json_schema"] = genspec_obj.generate_json_schema(
-                schema_out_path=schema_out_path, defaults=defaults
+                schema_out_path=schema_out_path,
+                defaults=defaults,
             )
             defaults = False
             schema_out_path = None
@@ -174,17 +171,17 @@ class ActionModule(ActionBase):
             if tree_schema and "path" in tree_schema:
                 schema_out_path = tree_schema["path"]
             result["tree_schema"] = genspec_obj.generate_tree_schema(
-                schema_out_path=schema_out_path
+                schema_out_path=schema_out_path,
             )
         except ValueError as exc:
             raise AnsibleActionFail(
-                to_text(exc, errors="surrogate_then_replace")
+                to_text(exc, errors="surrogate_then_replace"),
             )
         except Exception as exc:
             raise AnsibleActionFail(
                 "Unhandled exception from [action][generate_spec]. Error: {err}".format(
-                    err=to_text(exc, errors="surrogate_then_replace")
-                )
+                    err=to_text(exc, errors="surrogate_then_replace"),
+                ),
             )
 
         return result

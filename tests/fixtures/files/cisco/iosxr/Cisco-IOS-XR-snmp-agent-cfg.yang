@@ -28,7 +28,7 @@ module Cisco-IOS-XR-snmp-agent-cfg {
 
      E-mail: cs-yang@cisco.com";
 
-  description 
+  description
     "This module contains a collection of YANG definitions
      for Cisco IOS-XR snmp-agent package configuration.
 

@@ -4,10 +4,12 @@
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 import re
 import sys
+
 
 is_py2 = sys.version[0] == "2"
 if is_py2:
@@ -17,6 +19,7 @@ else:
 
 from ansible.module_utils._text import to_text
 from ansible.module_utils.connection import ConnectionError
+
 
 try:
     import xmltodict
@@ -39,7 +42,7 @@ class SchemaStore(object):
             raise ValueError(
                 "xmltodict is required to store response in json format "
                 "but does not appear to be installed. "
-                "It can be installed using `pip install xmltodict`"
+                "It can be installed using `pip install xmltodict`",
             )
 
         get_filter = """
@@ -56,13 +59,11 @@ class SchemaStore(object):
 
         res_json = xmltodict.parse(resp, dict_constructor=dict)
         if "rpc-reply" in res_json:
-            self._all_schema_list = res_json["rpc-reply"]["data"][
-                "netconf-state"
-            ]["schemas"]["schema"]
+            self._all_schema_list = res_json["rpc-reply"]["data"]["netconf-state"]["schemas"][
+                "schema"
+            ]
         else:
-            self._all_schema_list = res_json["data"]["netconf-state"][
-                "schemas"
-            ]["schema"]
+            self._all_schema_list = res_json["data"]["netconf-state"]["schemas"]["schema"]
 
         for index, schema_list in enumerate(self._all_schema_list):
             self._all_schema_identifier_list.append(schema_list["identifier"])
@@ -117,11 +118,16 @@ class SchemaStore(object):
         return found, data_model
 
     def get_schema_and_dependants(
-        self, schema_id, result, continue_on_failure=False
+        self,
+        schema_id,
+        result,
+        continue_on_failure=False,
     ):
         try:
             found, data_model = self.get_one_schema(
-                schema_id, result, continue_on_failure
+                schema_id,
+                result,
+                continue_on_failure,
             )
         except ValueError as exc:
             raise ValueError(exc)
@@ -149,7 +155,9 @@ class SchemaStore(object):
                 continue
 
             schema_dlist = self.get_schema_and_dependants(
-                schema_id, result, continue_on_failure
+                schema_id,
+                result,
+                continue_on_failure,
             )
             for schema_id in schema_dlist:
                 if schema_id not in result["fetched"]:

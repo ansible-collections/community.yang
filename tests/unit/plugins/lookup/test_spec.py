@@ -5,16 +5,20 @@
 
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 import os
 import unittest
 
 from ansible.errors import AnsibleLookupError
+
 from ansible_collections.community.yang.plugins.lookup.spec import LookupModule
 
+
 YANG_FILE_SEARCH_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "../../../fixtures/files"
+    os.path.dirname(os.path.abspath(__file__)),
+    "../../../fixtures/files",
 )
 OC_INTF_XML_CONFIG_FILE_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -51,7 +55,8 @@ class TestValidate(unittest.TestCase):
         with self.assertRaises(AnsibleLookupError) as error:
             self._lp.run([OC_INTF_YANG_FILE_PATH], LOOKUP_VARIABLES, **kwargs)
         self.assertIn(
-            "is invalid, valid value are config, data", str(error.exception)
+            "is invalid, valid value are config, data",
+            str(error.exception),
         )
 
     def test_valid_spec_data(self):
@@ -69,21 +74,19 @@ class TestValidate(unittest.TestCase):
         result = self._lp.run(terms, variables, **kwargs)
         # check json_skeleton data
         self.assertEqual(
-            result[0]["json_skeleton"]["openconfig-interfaces:interfaces"][
-                "interface"
-            ][0]["name"],
+            result[0]["json_skeleton"]["openconfig-interfaces:interfaces"]["interface"][0]["name"],
             "",
         )
         self.assertEqual(
-            result[0]["json_skeleton"]["openconfig-interfaces:interfaces"][
-                "interface"
-            ][0]["config"]["loopback-mode"],
+            result[0]["json_skeleton"]["openconfig-interfaces:interfaces"]["interface"][0][
+                "config"
+            ]["loopback-mode"],
             "False",
         )
         self.assertEqual(
-            result[0]["json_skeleton"]["openconfig-interfaces:interfaces"][
-                "interface"
-            ][0]["config"]["enabled"],
+            result[0]["json_skeleton"]["openconfig-interfaces:interfaces"]["interface"][0][
+                "config"
+            ]["enabled"],
             "True",
         )
 
