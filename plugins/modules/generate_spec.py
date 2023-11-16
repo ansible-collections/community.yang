@@ -15,9 +15,9 @@ module: generate_spec
 short_description: Generate JSON/XML schema and tree representation for given YANG model
 author: Rohit Thakur (@rohitthakur2590)
 description:
-    - The module will be read the given Yang model and generate the corresponding JSON, XML
-      schema and the YANG tree representation (as per RFC 8340) of the model and return in the
-      result and optionally store it in this individual files on control node.
+  - The module will be read the given Yang model and generate the corresponding JSON, XML
+    schema and the YANG tree representation (as per RFC 8340) of the model and return in the
+    result and optionally store it in this individual files on control node.
 options:
   content:
     description:
@@ -43,7 +43,7 @@ options:
         data will be present in skeleton, if value is C(data) both config and state data fields will be present
         in output.
     default: config
-    choices: ['config', 'data']
+    choices: ["config", "data"]
   json_schema:
     description: The options to control the way JSON schema is generated
     type: dict
@@ -83,16 +83,17 @@ options:
         description: The file path to which the generated tree schema should be stored.
         type: path
 requirements:
-- ncclient (>=v0.5.2)
-- pyang
+  - ncclient (>=v0.5.2)
+  - pyang
 notes:
-- This module requires the NETCONF system service be enabled on the remote device
-  being managed.
-- This module supports the use of connection=ansible.netcommon.netconf
+  - This module requires the NETCONF system service be enabled on the remote device
+    being managed.
+  - This module supports the use of connection=ansible.netcommon.netconf
 """
+
 RETURN = """
 tree_schema:
-  description: The tree schema representation of yang scehma as per RFC 8340
+  description: The tree schema representation of yang schema as per RFC 8340
   returned: always
   type: dict
   sample: |
@@ -194,6 +195,7 @@ xml_schema:
       </interfaces>
     </config>
 """
+
 EXAMPLES = """
 - name: generate spec from openconfig interface data and in result
   community.yang.generate_spec:
@@ -207,11 +209,11 @@ EXAMPLES = """
     doctype: config
     json_schema:
       path: "~/.ansible/yang/spec/{{ inventory_hostname }}/openconfig-interfaces-config.json"
-      defaults: True
+      defaults: true
     xml_schema:
       path: "~/.ansible/yang/spec/{{ inventory_hostname }}/openconfig-interfaces-config.xml"
-      defaults: True
-      annotations: True
+      defaults: true
+      annotations: true
     tree_schema:
       path: "~/.ansible/yang/spec/{{ inventory_hostname }}/openconfig-interfaces-config.tree"
 """

@@ -16,7 +16,7 @@ module: fetch
 short_description: Fetch given yang model and it's dependencies
 author: Ganesh Nalawade (@ganeshrn)
 description:
-    - Fetch given yang model and its dependant yang model from device using netconf rpc.
+  - Fetch given yang model and its dependant yang model from device using netconf rpc.
 options:
   name:
     description:
@@ -36,15 +36,16 @@ options:
     type: bool
     default: false
 requirements:
-- ncclient (>=v0.5.2)
-- pyang
-- xmltodict
+  - ncclient (>=v0.5.2)
+  - pyang
+  - xmltodict
 notes:
-- This module requires the NETCONF system service be enabled on the remote device
-  being managed.
-- This module supports the use of connection=ansible.netcommon.netconf
-- If no options provided it will return list of yang model name supported by remote host
+  - This module requires the NETCONF system service be enabled on the remote device
+    being managed.
+  - This module supports the use of connection=ansible.netcommon.netconf
+  - If no options provided it will return list of yang model name supported by remote host
 """
+
 RETURN = """
 number_schema_fetched:
   description: Total number of yang model fetched from remote host
@@ -52,22 +53,26 @@ number_schema_fetched:
   type: int
   sample: 10
 fetched:
-  description: This is a key-value pair were key is the name of the yang model and value
-               is the yang model itself in string format
+  description:
+    This is a key-value pair were key is the name of the yang model and value
+    is the yang model itself in string format
   returned: always apart from low-level errors (such as action plugin)
   type: dict
-  sample: {"ietf-inet-types": "module ietf-inet-types ...<--snip-->"}
+  sample: { "ietf-inet-types": "module ietf-inet-types ...<--snip-->" }
 supported_yang_modules:
   description: List of supported yang models name
   returned: only when model name is not provided
   type: list
-  sample: ["ietf-netconf-monitoring", "cisco-xr-ietf-netconf-monitoring-deviations"]
+  sample:
+    ["ietf-netconf-monitoring", "cisco-xr-ietf-netconf-monitoring-deviations"]
 failed_yang_modules:
   description: List of yang models that failed download
   returned: only when continue_on_failure is true
   type: list
-  sample: ["ietf-netconf-monitoring", "cisco-xr-ietf-netconf-monitoring-deviations"]
+  sample:
+    ["ietf-netconf-monitoring", "cisco-xr-ietf-netconf-monitoring-deviations"]
 """
+
 EXAMPLES = """
 - name: Fetch given yang model from remote host
   community.yang.fetch:
