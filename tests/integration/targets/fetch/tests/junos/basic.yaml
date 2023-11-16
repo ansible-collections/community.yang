@@ -1,8 +1,6 @@
 ---
 - debug:
-    msg="START community.yang.fetch junos/basic.yaml on connection={{ ansible_connection
-    }}"
+    msg: "START community.yang.fetch junos/basic.yaml on connection={{ ansible_connection }}"
 
 - debug:
-    msg="END community.yang.fetch junos/basic.yaml on connection={{ ansible_connection
-    }}"
+    msg: "END community.yang.fetch junos/basic.yaml on connection={{ ansible_connection }}"

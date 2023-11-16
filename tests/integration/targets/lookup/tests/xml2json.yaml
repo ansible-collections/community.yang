@@ -1,9 +1,12 @@
 ---
-- debug: msg="START community.yang.xml2json on connection={{ ansible_connection }}"
+- debug:
+    msg: "START community.yang.xml2json on connection={{ ansible_connection }}"
 
 - name: Convert interface xml config to json
   set_fact:
-    interface_oc_json: "{{ lookup('community.yang.xml2json', xml2json_interface_valid_xml_config, yang_file=xml2json_yang_file, search_path=xml2json_search_path) }}"
+    interface_oc_json:
+      "{{ lookup('community.yang.xml2json', xml2json_interface_valid_xml_config, yang_file=xml2json_yang_file, search_path=xml2json_search_path)
+      }}"
 
 - assert:
     that:
@@ -33,12 +36,15 @@
 
 - name: invalid input json configuration
   set_fact:
-    interface_oc_json: "{{ lookup('community.yang.xml2json', xml2json_interface_invalid_xml_config, yang_file=xml2json_yang_file, search_path=xml2json_search_path) }}"
+    interface_oc_json:
+      "{{ lookup('community.yang.xml2json', xml2json_interface_invalid_xml_config, yang_file=xml2json_yang_file, search_path=xml2json_search_path)
+      }}"
   ignore_errors: true
   register: result
 
 - assert:
     that:
-      - "result.failed == True"
+      - result.failed == True
 
-- debug: msg="END community.yang.xml2json on connection={{ ansible_connection }}"
+- debug:
+    msg: "END community.yang.xml2json on connection={{ ansible_connection }}"

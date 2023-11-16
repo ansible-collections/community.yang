@@ -1,8 +1,8 @@
 ---
-- debug:
-    msg="START community.yang.generate_spec junos/basic.yaml on connection={{ ansible_connection
-    }}"
+- name: Debug task
+  debug:
+    msg: "START community.yang.generate_spec junos/basic.yaml on connection={{ ansible_connection }}"
 
-- debug:
-    msg="END community.yang.generate_spec junos/basic.yaml on connection={{ ansible_connection
-    }}"
+- name: Debug task
+  debug:
+    msg: "END community.yang.generate_spec junos/basic.yaml on connection={{ ansible_connection }}"

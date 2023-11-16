@@ -1,5 +1,6 @@
 ---
-- debug: msg="START community.yang.spec on connection={{ ansible_connection }}"
+- debug:
+    msg: "START community.yang.spec on connection={{ ansible_connection }}"
 
 - name: Convert interface yang module to spec with default values
   set_fact:
@@ -10,11 +11,11 @@
       - "'json_skeleton' in interface_spec"
       - "'xml_skeleton' in interface_spec"
       - "'tree' in interface_spec"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['config'] is defined"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['config']['description'] is defined"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['name'] is defined"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['subinterfaces']['subinterface'][0]['config']['index'] == '0'"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['subinterfaces']['subinterface'][0]['config']['enabled'] == 'True'"
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['config'] is defined
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['config']['description'] is defined
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['name'] is defined
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['subinterfaces']['subinterface'][0]['config']['index'] == '0'
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['subinterfaces']['subinterface'][0]['config']['enabled'] == 'True'
       - "'<interface>' in interface_spec['xml_skeleton']"
       - "'<config>' in interface_spec['xml_skeleton']"
       - "'module: openconfig-interfaces' in interface_spec['tree']"
@@ -29,11 +30,11 @@
       - "'json_skeleton' in interface_spec"
       - "'xml_skeleton' in interface_spec"
       - "'tree' in interface_spec"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['config'] is defined"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['config']['description'] is defined"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['name'] is defined"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['subinterfaces']['subinterface'][0]['config']['index'] == ''"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['subinterfaces']['subinterface'][0]['config']['enabled'] == ''"
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['config'] is defined
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['config']['description'] is defined
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['name'] is defined
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['subinterfaces']['subinterface'][0]['config']['index'] == ''
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['subinterfaces']['subinterface'][0]['config']['enabled'] == ''
       - "'<interface>' in interface_spec['xml_skeleton']"
       - "'<loopback-mode>False</loopback-mode>' not in interface_spec['xml_skeleton']"
       - "'<!-- # keys: name-->' in interface_spec['xml_skeleton']"
@@ -47,12 +48,12 @@
       - "'json_skeleton' in interface_spec"
       - "'xml_skeleton' in interface_spec"
       - "'tree' in interface_spec"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['config'] is defined"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['state'] is defined"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['state']['admin-status'] is defined"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['name'] is defined"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['subinterfaces']['subinterface'][0]['state']['admin-status'] is defined"
-      - "interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['subinterfaces']['subinterface'][0]['state']['counters'] is defined"
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['config'] is defined
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['state'] is defined
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['state']['admin-status'] is defined
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['name'] is defined
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['subinterfaces']['subinterface'][0]['state']['admin-status'] is defined
+      - interface_spec['json_skeleton']['openconfig-interfaces:interfaces']['interface'][0]['subinterfaces']['subinterface'][0]['state']['counters'] is defined
       - "'<out-broadcast-pkts/>' in interface_spec['xml_skeleton']"
       - "'<oper-status/>' in interface_spec['xml_skeleton']"
       - "'<state>' in interface_spec['xml_skeleton']"
@@ -77,4 +78,5 @@
     that:
       - "'invalid directory path' in result.msg"
 
-- debug: msg="END community.yang.spec on connection={{ ansible_connection }}"
+- debug:
+    msg: "END community.yang.spec on connection={{ ansible_connection }}"

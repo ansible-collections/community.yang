@@ -1,9 +1,8 @@
 ---
 name: release
-on:  # yamllint disable-line rule:truthy
+on: # yamllint disable-line rule:truthy
   release:
     types: [published]
-
 jobs:
   release:
     uses: ansible/devtools/.github/workflows/release_collection.yml@main

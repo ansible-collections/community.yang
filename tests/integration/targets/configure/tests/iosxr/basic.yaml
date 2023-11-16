@@ -1,7 +1,6 @@
 ---
 - debug:
-    msg="START community.yang.configure iosxr/basic.yaml on connection={{ ansible_connection
-    }}"
+    msg: "START community.yang.configure iosxr/basic.yaml on connection={{ ansible_connection }}"
 
 - name: configure interface configuration using cisco iosxr yang model
   community.yang.configure:
@@ -28,8 +27,8 @@
     msg: "{{ result }}"
 - assert:
     that:
-      - "result.failed == false"
-      - "result.changed == true"
+      - result.failed == false
+      - result.changed == true
 
 - name: test for invalid yang_file path
   community.yang.configure:
@@ -37,14 +36,14 @@
     get_filter: |
       <interface-configurations xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-ifmgr-cfg"><interface-configuration>
       </interface-configuration></interface-configurations>
-    file: "/tmp/test_invalid"
+    file: /tmp/test_invalid
     search_path: "{{ configure_search_path }}"
   register: result
   ignore_errors: true
 
 - assert:
     that:
-      - "result.failed == true"
+      - result.failed == true
       - "'invalid yang_file path' in result.msg"
 
 - name: test for invalid search_path value
@@ -54,15 +53,14 @@
       <interface-configurations xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-ifmgr-cfg"><interface-configuration>
       </interface-configuration></interface-configurations>
     file: "{{ configure_yang_file }}"
-    search_path: "/tmp/test_invalid"
+    search_path: /tmp/test_invalid
   register: result
   ignore_errors: true
 
 - assert:
     that:
-      - "result.failed == true"
+      - result.failed == true
       - "'invalid search_path directory' in result.msg"
 
 - debug:
-    msg="END community.yang.configure iosxr/basic.yaml on connection={{ ansible_connection
-    }}"
+    msg: "END community.yang.configure iosxr/basic.yaml on connection={{ ansible_connection }}"

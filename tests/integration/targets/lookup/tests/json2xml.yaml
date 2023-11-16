@@ -11,16 +11,17 @@
       - "'<oc-if:name>GigabitEthernet0/0/0/2</oc-if:name>' in interface_oc_xml"
       - "'<oc-if:config>' in interface_oc_xml"
       - "'<oc-if:description>test openconfig</oc-if:description>' in interface_oc_xml"
-      - '''<nc:config xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"'' in interface_oc_xml'
+      - "'<nc:config xmlns:nc=\"urn:ietf:params:xml:ns:netconf:base:1.0\"' in interface_oc_xml"
 
 - name: Convert interface json config to xml with data as root node
   set_fact:
-    interface_oc_xml: "{{ lookup('community.yang.json2xml', json2xml_interface_valid_config, doctype='data', yang_file=json2xml_yang_file, search_path=json2xml_search_path) }}"
+    interface_oc_xml: "{{ lookup('community.yang.json2xml', json2xml_interface_valid_config, doctype='data', yang_file=json2xml_yang_file, search_path=json2xml_search_path)
+      }}"
 
 - assert:
     that:
-      - '''<nc:config xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"'' not in interface_oc_xml'
-      - '''<nc:data xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"'' in interface_oc_xml'
+      - "'<nc:config xmlns:nc=\"urn:ietf:params:xml:ns:netconf:base:1.0\"' not in interface_oc_xml"
+      - "'<nc:data xmlns:nc=\"urn:ietf:params:xml:ns:netconf:base:1.0\"' in interface_oc_xml"
 
 - name: Wrong yang module path
   set_fact:
@@ -50,7 +51,7 @@
 
 - assert:
     that:
-      - "result.failed == True"
+      - result.failed == True
       # Uncomment below condition after issue in pyang is fixed
       # Issue: https://github.com/mbj4668/pyang/issues/402 #
       # Fix: https://github.com/mbj4668/pyang/pull/403 #
@@ -87,7 +88,8 @@
 
 - name: Convert interface json config to xml with data as root node
   set_fact:
-    multi_ietf_xml: "{{ lookup('community.yang.json2xml', json2xml_multi_valid_config, doctype='data', yang_file=json2xml_multi_yang_file, search_path=json2xml_search_path) }}"
+    multi_ietf_xml: "{{ lookup('community.yang.json2xml', json2xml_multi_valid_config, doctype='data', yang_file=json2xml_multi_yang_file, search_path=json2xml_search_path)
+      }}"
 
 - assert:
     that:
@@ -102,7 +104,7 @@
 
 - assert:
     that:
-      - "result.failed == True"
+      - result.failed == True
       # Uncomment below condition after issue in pyang is fixed
       # Issue: https://github.com/mbj4668/pyang/issues/402 #
       # Fix: https://github.com/mbj4668/pyang/pull/403 #
