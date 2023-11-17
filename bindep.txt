@@ -2,10 +2,10 @@
 # see https://docs.openstack.org/infra/bindep/ for additional information.
 
 gcc-c++ [doc test platform:rpm]
-libyaml [test platform:rpm]
-libyaml [test platform:dpkg]
-libxml2 [test platform:dpkg]
-libxslt [test platform:dpkg]
-libxml2 [test platform:rpm]
-libxslt [test platform:rpm]
+libyaml-devel [test platform:rpm]
+libyaml-dev [test platform:dpkg]
+libxml2-dev [test platform:dpkg]
+libxslt-dev [test platform:dpkg]
+libxml2-devel [test platform:rpm]
+libxslt-devel [test platform:rpm]
 xsltproc [test platform:dpkg]
