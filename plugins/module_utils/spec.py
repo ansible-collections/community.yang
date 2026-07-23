@@ -17,7 +17,7 @@ import errno
 import subprocess
 from copy import deepcopy
 
-from ansible.module_utils.six import StringIO
+from io import StringIO
 from ansible.module_utils.basic import missing_required_lib
 
 from ansible_collections.community.yang.plugins.module_utils.common import (
