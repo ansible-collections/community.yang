@@ -58,7 +58,6 @@ _raw:
 
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleLookupError
-from ansible.module_utils.six import raise_from
 from ansible.module_utils._text import to_text
 
 from ansible_collections.community.yang.plugins.module_utils.translator import (
@@ -94,12 +93,9 @@ class LookupModule(LookupBase):
 
     def run(self, terms, variables, **kwargs):
         if PYANG_IMPORT_ERROR:
-            raise_from(
-                AnsibleLookupError(
-                    "pyang must be installed to use this plugin"
-                ),
-                PYANG_IMPORT_ERROR,
-            )
+            raise AnsibleLookupError(
+                "pyang must be installed to use this plugin"
+            ) from PYANG_IMPORT_ERROR
 
         res = []
         try:
